@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Petualangan TKA Matematika SD</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F4F8;
+  --bg-alt: #E0E7FF;
+  --paper: #FFFFFF;
+  --ink: #1E293B;
+  --ink-soft: #475569;
+  --muted: #94A3B8;
+  --c1: #FF6B6B; /* Merah */
+  --c1-dark: #E63946;
+  --c2: #4ECDC4; /* Cyan */
+  --c2-dark: #2A9D8F;
+  --c3: #FFD93D; /* Kuning */
+  --c3-dark: #E6B800;
+  --c4: #6BCB77; /* Hijau */
+  --c4-dark: #3D9148;
+  --c5: #B983FF; /* Ungu */
+  --c5-dark: #7C3AED;
+  --shadow: rgba(30, 41, 59, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Nunito', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image:
+    radial-gradient(circle at 10% 20%, rgba(255,107,107,0.1), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(78,205,196,0.1), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255,217,61,0.08), transparent 60%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.float-bg {
+  position: fixed; inset: 0;
+  z-index: 2; pointer-events: none; overflow: hidden;
+}
+.float-item {
+  position: absolute;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  opacity: 0.08;
+  animation: floatUp linear infinite;
+  user-select: none;
+}
+@keyframes floatUp {
+  0% { transform: translateY(110vh) rotate(0deg); }
+  100% { transform: translateY(-20vh) rotate(360deg); }
+}
+
+.progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 6px;
+  background: linear-gradient(90deg, var(--c1), var(--c3), var(--c4), var(--c2), var(--c5));
+  z-index: 100;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 6px 6px 0;
+}
+
+header {
+  position: fixed; top: 0; left: 0; right: 0;
+  padding: 14px 28px;
+  display: flex; justify-content: space-between; align-items: center;
+  z-index: 50; pointer-events: none;
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800; font-size: 18px;
+  pointer-events: auto;
+  color: var(--ink);
+}
+.logo-icon {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, var(--c1), var(--c5));
+  color: white;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800;
+  font-family: 'Baloo 2', cursive;
+  box-shadow: 0 4px 0 var(--c1-dark);
+  transform: rotate(-5deg);
+  animation: logoBounce 3s ease-in-out infinite;
+}
+@keyframes logoBounce {
+  0%, 100% { transform: rotate(-5deg) translateY(0); }
+  50% { transform: rotate(5deg) translateY(-3px); }
+}
+.slide-counter {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700; font-size: 14px;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  box-shadow: 0 3px 0 var(--ink);
+  border: 2px solid var(--ink);
+  pointer-events: auto;
+}
+.slide-counter span { color: var(--c1); font-size: 18px; }
+
+.slides-container {
+  position: relative;
+  height: 100vh; width: 100vw;
+  z-index: 10;
+}
+.slide {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  padding: 72px 28px 80px;
+  display: flex; flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  opacity: 0; transform: translateX(60px);
+  transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.slide.active { opacity: 1; transform: translateX(0); pointer-events: auto; }
+.slide.prev { transform: translateX(-60px); }
+.slide::-webkit-scrollbar { width: 8px; }
+.slide::-webkit-scrollbar-track { background: transparent; }
+.slide::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 8px; }
+
+.slide-inner {
+  margin: auto 0;
+  width: 100%;
+  max-width: 1200px;
+  padding: 8px 0;
+}
+
+.nav-controls {
+  position: fixed; bottom: 18px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 12px; align-items: center;
+  z-index: 100;
+  background: white;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 2px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink), 0 8px 20px var(--shadow);
+}
+.nav-btn {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--c3);
+  color: var(--ink);
+  cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  font-weight: 800;
+  font-family: 'Baloo 2', cursive;
+}
+.nav-btn:hover:not(:disabled) {
+  background: var(--c1);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 0 var(--ink);
+}
+.nav-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.nav-dots { display: flex; gap: 6px; padding: 0 6px; }
+.dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--bg-alt);
+  border: 2px solid var(--ink);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.dot.active {
+  background: var(--c1);
+  transform: scale(1.3);
+}
+
+/* === TITLES === */
+.slide-title {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: clamp(32px, 4.5vw, 56px);
+  line-height: 1;
+  margin-bottom: 6px;
+  letter-spacing: -1px;
+  text-align: center;
+}
+.slide-title .accent {
+  color: var(--c1);
+  position: relative;
+  display: inline-block;
+}
+.slide-title .accent::after {
+  content: '';
+  position: absolute;
+  bottom: 4px; left: -4px; right: -4px;
+  height: 12px;
+  background: var(--c3);
+  z-index: -1;
+  border-radius: 6px;
+  transform: skewX(-8deg);
+}
+.slide-subtitle {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+/* === SLIDE 1: COVER === */
+.cover { text-align: center; position: relative; }
+.cover-tag {
+  display: inline-block;
+  background: var(--c4);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 24px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700; font-size: 12px;
+  letter-spacing: 2px; text-transform: uppercase;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 0 var(--c4-dark);
+  transform: rotate(-2deg);
+  animation: tagWiggle 4s ease-in-out infinite;
+}
+@keyframes tagWiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.cover h1 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: clamp(40px, 6vw, 88px);
+  line-height: 0.95;
+  margin-bottom: 12px;
+  letter-spacing: -2px;
+}
+.cover h1 .accent { color: var(--c1); }
+.cover h1 .accent2 { color: var(--c2-dark); }
+.cover-subtitle {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 18px;
+  color: var(--ink-soft);
+  margin: 14px 0 28px;
+}
+.start-btn {
+  background: var(--c1);
+  color: white;
+  border: 3px solid var(--ink);
+  padding: 14px 36px;
+  border-radius: 18px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--c1-dark);
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--c1-dark);
+}
+.start-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 var(--c1-dark);
+}
+
+.cover-deco {
+  position: absolute;
+  font-size: 56px;
+  pointer-events: none;
+  animation: floatDeco 5s ease-in-out infinite;
+}
+.deco-1 { top: -10px; left: 5%; color: var(--c1); animation-delay: 0s; }
+.deco-2 { top: 30px; right: 5%; color: var(--c2); animation-delay: 1s; }
+.deco-3 { bottom: 20px; left: 8%; color: var(--c3); animation-delay: 2s; }
+.deco-4 { bottom: 60px; right: 8%; color: var(--c5); animation-delay: 1.5s; }
+@keyframes floatDeco {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-15px) rotate(15deg); }
+}
+
+/* === SLIDE 2: DAFTAR MATERI === */
+.pusmendik-banner {
+  display: block;
+  background: linear-gradient(135deg, var(--c2-dark), var(--c5-dark));
+  color: white;
+  padding: 14px 24px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 5px 0 var(--ink);
+  transition: all 0.2s;
+}
+.pusmendik-banner:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 0 var(--ink);
+}
+.pusmendik-banner small {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  opacity: 0.9;
+  margin-top: 4px;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.menu-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 6px 0 var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.menu-icon {
+  width: 70px; height: 70px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin-bottom: 12px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+}
+.menu-card:nth-child(1) .menu-icon { background: var(--c1-soft); }
+.menu-card:nth-child(2) .menu-icon { background: var(--c2-soft); }
+.menu-card:nth-child(3) .menu-icon { background: var(--c4-soft); }
+
+.menu-card h3 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 20px;
+  margin-bottom: 6px;
+}
+.menu-card p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 14px;
+  flex: 1;
+}
+.menu-btns {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+.menu-btn {
+  flex: 1;
+  padding: 10px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.menu-btn.materi { background: var(--c3); color: var(--ink); }
+.menu-btn.materi:hover { transform: translateY(-2px); box-shadow: 0 5px 0 var(--ink); }
+.menu-btn.kuis { background: var(--c5); color: white; }
+.menu-btn.kuis:hover { transform: translateY(-2px); box-shadow: 0 5px 0 var(--ink); }
+
+/* === MATERI SLIDES (3, 4, 5) === */
+.materi-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.wayground-btn {
+  background: var(--c2-dark);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 12px;
+  text-decoration: none;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 14px;
+  border: 2px solid var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
+  transition: all 0.2s;
+}
+.wayground-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 0 var(--ink); }
+
+.accordion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.accordion-item {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 0 var(--ink);
+}
+.accordion-header {
+  padding: 12px 18px;
+  background: var(--bg-alt);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+.accordion-header:hover { background: var(--c3); }
+.accordion-item.active .accordion-header { background: var(--c1); color: white; }
+.accordion-header .arrow {
+  font-size: 14px;
+  transition: transform 0.3s;
+}
+.accordion-item.active .accordion-header .arrow { transform: rotate(90deg); }
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+.accordion-item.active .accordion-content { max-height: 2000px; }
+.accordion-inner {
+  padding: 16px 18px;
+}
+
+.summary-box {
+  background: #FEF9C3;
+  border-left: 5px solid var(--c3-dark);
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+.summary-box h4 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 14px;
+  margin-bottom: 4px;
+  color: var(--c3-dark);
+}
+.summary-box p { font-size: 13px; color: var(--ink); line-height: 1.5; }
+
+.quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.quiz-item {
+  background: var(--bg);
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 12px;
+}
+.quiz-q {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 6px;
+}
+.quiz-q-num {
+  background: var(--c5);
+  color: white;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.quiz-opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.quiz-opt {
+  background: white;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-align: left;
+}
+.quiz-opt:hover { background: var(--c3); }
+.quiz-opt.selected { background: var(--c2); color: var(--ink); border-color: var(--c2-dark); }
+.quiz-item.correct .quiz-opt.selected { background: var(--c4); border-color: var(--c4-dark); }
+.quiz-item.wrong .quiz-opt.selected { background: var(--c1); color: white; border-color: var(--c1-dark); }
+
+.quiz-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.quiz-check-btn {
+  background: var(--c4);
+  color: white;
+  border: 2px solid var(--ink);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 var(--ink);
+}
+.quiz-check-btn:hover { background: var(--c4-dark); }
+.quiz-exp {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-style: italic;
+  display: none;
+  margin-top: 4px;
+  padding: 6px 8px;
+  background: white;
+  border-radius: 6px;
+  border: 1px dashed var(--ink);
+}
+.quiz-exp.show { display: block; animation: fadeIn 0.3s; }
+.quiz-exp strong { color: var(--c4-dark); }
+.quiz-item.wrong .quiz-exp strong { color: var(--c1-dark); }
+
+/* === SLIDE 6: SIMULASI === */
+.simulasi-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 8px 0 var(--ink);
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.simulasi-card .icon-big {
+  font-size: 80px;
+  margin-bottom: 16px;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.simulasi-card h3 {
+  font-family: 'Baloo 2', cursive;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+.simulasi-card p {
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.big-link-btn {
+  display: inline-block;
+  background: var(--c1);
+  color: white;
+  padding: 16px 32px;
+  border-radius: 16px;
+  text-decoration: none;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 20px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 6px 0 var(--c1-dark);
+  transition: all 0.2s;
+}
+.big-link-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 9px 0 var(--c1-dark);
+}
+
+/* === SLIDE 7: TIPS & TRICK === */
+.tips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+.tip-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 5px 0 var(--ink);
+  position: relative;
+  transition: all 0.3s;
+}
+.tip-card:hover {
+  transform: translateY(-4px) rotate(-1deg);
+  box-shadow: 0 9px 0 var(--ink);
+}
+.tip-card:nth-child(1) { background: #FFE5E5; }
+.tip-card:nth-child(2) { background: #DFF7F4; }
+.tip-card:nth-child(3) { background: #FFF8E1; }
+.tip-card:nth-child(4) { background: #E0F5E3; }
+
+.tip-num {
+  position: absolute;
+  top: -14px; right: 16px;
+  background: var(--ink);
+  color: white;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 16px;
+  border: 3px solid white;
+}
+.tip-card .icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+.tip-card h4 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 17px;
+  margin-bottom: 6px;
+}
+.tip-card p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* === SLIDE 8: REFLECTION === */
+.reflection { text-align: center; }
+.refl-emoji {
+  font-size: 60px;
+  display: inline-block;
+  animation: wave 2s ease-in-out infinite;
+}
+@keyframes wave {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-15deg); }
+  75% { transform: rotate(15deg); }
+}
+.reflection h2 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1;
+  margin: 10px 0 8px;
+  letter-spacing: -1px;
+}
+.reflection h2 .accent { color: var(--c1); }
+.reflection h2 .accent2 { color: var(--c2-dark); }
+.reflection .sub {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 16px;
+  color: var(--ink-soft);
+  margin-bottom: 28px;
+}
+.refl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  margin: 24px 0;
+  text-align: left;
+}
+.refl-card {
+  background: white;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 4px 0 var(--ink);
+  position: relative;
+}
+.refl-card::before {
+  content: '?';
+  position: absolute;
+  top: -14px; left: 16px;
+  background: var(--c3);
+  color: var(--ink);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 18px;
+  border: 2px solid var(--ink);
+}
+.refl-card:nth-child(2)::before { background: var(--c1); color: white; }
+.refl-card:nth-child(3)::before { background: var(--c2); color: white; }
+.refl-card h4 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 700;
+  font-size: 15px;
+  margin: 8px 0 6px;
+}
+.refl-card p {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.thank-you {
+  margin-top: 28px;
+  padding: 24px;
+  background: linear-gradient(135deg, var(--c1), var(--c5));
+  color: white;
+  border-radius: 20px;
+  border: 3px solid var(--ink);
+  box-shadow: 0 6px 0 var(--ink);
+  position: relative;
+}
+.thank-you h3 {
+  font-family: 'Baloo 2', cursive;
+  font-weight: 800;
+  font-size: 32px;
+}
+.thank-you p {
+  font-family: 'Fredoka', sans-serif;
+  font-size: 16px;
+  margin-top: 8px;
+}
+.sparkle {
+  position: absolute;
+  font-size: 22px;
+  animation: sparkleFloat 3s ease-in-out infinite;
+}
+.sparkle.s1 { top: -12px; left: 8%; }
+.sparkle.s2 { top: -16px; right: 12%; animation-delay: 1s; }
+.sparkle.s3 { bottom: -12px; left: 18%; animation-delay: 1.5s; }
+.sparkle.s4 { bottom: -16px; right: 8%; animation-delay: 0.5s; }
+@keyframes sparkleFloat {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-8px) rotate(180deg); }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .slide { padding: 70px 12px 80px; }
+  header { padding: 10px 12px; }
+  .logo span { display: none; }
+  .menu-grid { grid-template-columns: 1fr; }
+  .quiz-opts { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="float-bg" id="floatBg"></div>
+<div class="progress-bar" id="progressBar" style="width: 12.5%"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">∑</div>
+    <span>TKA Math Adventure</span>
+  </div>
+  <div class="slide-counter">Slide <span id="currentSlide">1</span>/8</div>
+</header>
+
+<div class="slides-container">
+
+  <!-- ========== SLIDE 1: COVER ========== -->
+  <section class="slide active" data-slide="1">
+    <div class="slide-inner cover">
+      <div class="cover-deco deco-1">+</div>
+      <div class="cover-deco deco-2">×</div>
+      <div class="cover-deco deco-3">÷</div>
+      <div class="cover-deco deco-4">−</div>
+      
+      <div class="cover-tag">Asesmen Kompetensi Minimum • SD</div>
+      <h1>Petualangan<br><span class="accent">TKA</span> <span class="accent2">Matematika</span></h1>
+      <p class="cover-subtitle">Siap menjadi Juara Asesmen? Yuk kita pelajari materinya dengan seru!</p>
+      
+      <button class="start-btn" onclick="goToSlide(2)">🚀 Mulai Petualangan!</button>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 2: DAFTAR MATERI ========== -->
+  <section class="slide" data-slide="2">
+    <div class="slide-inner">
+      <h2 class="slide-title">Daftar <span class="accent">Materi TKA</span></h2>
+      <p class="slide-subtitle">Pilih materi yang ingin kamu pelajari atau langsung kerjakan kuisnya!</p>
+      
+      <a href="https://pusmendik.kemendikdasmen.go.id/tka/tka/view/mata-pelajaran-wajib/sd" target="_blank" rel="noopener" class="pusmendik-banner">
+        📚 Panduan Resmi Kurikulum TKA SD
+        <small>Klik untuk mengunjungi website Pusmendik</small>
+      </a>
+
+      <div class="menu-grid">
+        <div class="menu-card">
+          <div class="menu-icon">🔢</div>
+          <h3>Bilangan Rasional</h3>
+          <p>Pecahan, desimal, persen, operasi hitung, KPK & FPB.</p>
+          <div class="menu-btns">
+            <button class="menu-btn materi" onclick="goToSlide(3)">📖 Materi</button>
+            <a href="https://https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="menu-btn kuis">🚌 Kuis</a>
+          </div>
+        </div>
+        
+        <div class="menu-card">
+          <div class="menu-icon">📐</div>
+          <h3>Geometri & Pengukuran</h3>
+          <p>Bangun datar, ruang, satuan ukur, waktu, kecepatan, sudut.</p>
+          <div class="menu-btns">
+            <button class="menu-btn materi" onclick="goToSlide(4)">📖 Materi</button>
+            <a href="https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="menu-btn kuis">🚌 Kuis</a>
+          </div>
+        </div>
+        
+        <div class="menu-card">
+          <div class="menu-icon">📊</div>
+          <h3>Data</h3>
+          <p>Penyajian data diagram, piktogram, dan pengolahan informasi.</p>
+          <div class="menu-btns">
+            <button class="menu-btn materi" onclick="goToSlide(5)">📖 Materi</button>
+            <a href="https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="menu-btn kuis">🚌 Kuis</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 3: BILANGAN RASIONAL ========== -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <div class="materi-header">
+        <h2 class="slide-title" style="text-align:left; margin-bottom:0;">Materi: <span class="accent">Bilangan Rasional</span></h2>
+        <a href="https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="wayground-btn">🚌 Kerjakan Kuis Wayground</a>
+      </div>
+      <div class="accordion-list" id="accList1"></div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 4: GEOMETRI ========== -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <div class="materi-header">
+        <h2 class="slide-title" style="text-align:left; margin-bottom:0;">Materi: <span class="accent">Geometri & Pengukuran</span></h2>
+        <a href="https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="wayground-btn">🚌 Kerjakan Kuis Wayground</a>
+      </div>
+      <div class="accordion-list" id="accList2"></div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 5: DATA ========== -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <div class="materi-header">
+        <h2 class="slide-title" style="text-align:left; margin-bottom:0;">Materi: <span class="accent">Data</span></h2>
+        <a href="https://sd.onedumind.com/matematika.html" target="_blank" rel="noopener" class="wayground-btn">🚌 Kerjakan Kuis Wayground</a>
+      </div>
+      <div class="accordion-list" id="accList3"></div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 6: SIMULASI ========== -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <h2 class="slide-title">Simulasi <span class="accent">Seluruh Materi</span></h2>
+      <p class="slide-subtitle">Sudah siap uji kemampuanmu seperti Asesmen yang sesungguhnya?</p>
+      
+      <div class="simulasi-card">
+        <div class="icon-big">🎯</div>
+        <h3>Waktu Simulasi!</h3>
+        <p>Kerjakan soal-soal simulasi yang disediakan oleh Pusmendik. Jangan lupa baca soal dengan teliti dan kelola waktumu dengan baik. Semoga sukses!</p>
+        <a href="https://pusmendik.kemendikdasmen.go.id/tka/tka/view/mata-pelajaran-wajib/sd" target="_blank" rel="noopener" class="big-link-btn">
+          🚀 Mulai Simulasi
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 7: TIPS & TRICK ========== -->
+  <section class="slide" data-slide="7">
+    <div class="slide-inner">
+      <h2 class="slide-title">Tips & <span class="accent">Trick TKA</span></h2>
+      <p class="slide-subtitle">Rahasia mengerjakan soal dengan cepat dan tepat!</p>
+      
+      <div class="tips-grid">
+        <div class="tip-card">
+          <div class="tip-num">1</div>
+          <div class="icon">⏱️</div>
+          <h4>Kelola Waktu</h4>
+          <p>Jangan terjebak di satu soal. Jika sulit, lewati dulu dan kerjakan yang mudah. Kembali lagi jika masih ada waktu sisa.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">2</div>
+          <div class="icon">📖</div>
+          <h4>Baca Soal Hati-hati</h4>
+          <p>Tandai kata kunci seperti "TIDAK", "KECUALI", atau "PALING TEPAT". Banyak siswa salah hanya karena buru-buru membaca.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">3</div>
+          <div class="icon">🗑️</div>
+          <h4>Eliminasi Jawaban</h4>
+          <p>Jika ragu, coret dulu jawaban yang pasti salah. Menebak dari 2 pilihan peluangnya lebih besar daripada dari 4 pilihan.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">4</div>
+          <div class="icon">✏️</div>
+          <h4>Coret-coret Kertas</h4>
+          <p>Manfaatkan kertas buram untuk menghitung soal pecahan atau geometri. Jangan hanya mengandalkan hitungan di kepala.</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">5</div>
+          <div class="icon">✅</div>
+          <h4>Jangan Kosong</h4>
+          <p>Asesmen ini tidak mengurangi nilai untuk jawaban salah. Jadi pastikan semua soal terjawab sebelum waktu berakhir!</p>
+        </div>
+        <div class="tip-card">
+          <div class="tip-num">6</div>
+          <div class="icon">🧘</div>
+          <h4>Tetap Tenang</h4>
+          <p>Jika menemukan soal sulit, tarik napas dalam-dalam. Otak yang tenang akan lebih mudah menemukan ide penyelesaian.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== SLIDE 8: REFLECTION ========== -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner reflection">
+      <div class="refl-emoji">🎉</div>
+      <h2>Sampai Jumpa, <span class="accent">Juara</span> <span class="accent2">Asesmen</span>!</h2>
+      <p class="sub">Saatnya merenungkan apa yang sudah kita pelajari hari ini</p>
+      
+      <div class="refl-grid">
+        <div class="refl-card">
+          <h4>Apa yang sudah kupelajari?</h4>
+          <p>Sebutkan 3 materi TKA Matematika yang paling kamu pahami setelah petualangan ini. Apakah pecahan, bangun ruang, atau mengolah data?</p>
+        </div>
+        <div class="refl-card">
+          <h4>Mana yang masih perlu dilatih?</h4>
+          <p>Catat 1 materi yang masih terasa sulit. Kerjakan lagi kuis di Wayground untuk materia tersebut agar semakin mahir!</p>
+        </div>
+        <div class="refl-card">
+          <h4>Apakah tipsnya membantu?</h4>
+          <p>Dari 6 tips & trick yang diberikan, mana yang paling akan kamu gunakan saat mengerjakan Asesmen nanti?</p>
+        </div>
+      </div>
+
+      <div class="thank-you">
+        <div class="sparkle s1">✦</div>
+        <div class="sparkle s2">★</div>
+        <div class="sparkle s3">✧</div>
+        <div class="sparkle s4">✦</div>
+        <h3>Thank You for Today!</h3>
+        <p>Teruslah berlatih, teruslah mencoba — kamu hebat! 💪🌟</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="nav-controls">
+  <button class="nav-btn" id="prevBtn" disabled>‹</button>
+  <div class="nav-dots" id="navDots"></div>
+  <button class="nav-btn" id="nextBtn">›</button>
+</div>
+
+<script>
+/* ===== FLOATING BG ===== */
+const floatBg = document.getElementById('floatBg');
+const symbols = ['+','−','×','÷','=','1','2','3','4','5','6','7','8','9','0','?','π','Δ','√'];
+for (let i = 0; i < 22; i++) {
+  const el = document.createElement('div');
+  el.className = 'float-item';
+  el.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+  el.style.left = Math.random() * 100 + '%';
+  el.style.fontSize = (24 + Math.random() * 50) + 'px';
+  el.style.color = ['#FF6B6B','#4ECDC4','#FFD93D','#6BCB77','#B983FF'][Math.floor(Math.random()*5)];
+  el.style.animationDuration = (15 + Math.random() * 15) + 's';
+  el.style.animationDelay = (-Math.random() * 15) + 's';
+  floatBg.appendChild(el);
+}
+
+/* ===== SLIDE NAV ===== */
+let currentSlide = 1;
+const totalSlides = 8;
+const slides = document.querySelectorAll('.slide');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const progressBar = document.getElementById('progressBar');
+const currentSlideEl = document.getElementById('currentSlide');
+const navDots = document.getElementById('navDots');
+for (let i = 1; i <= totalSlides; i++) {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 1 ? ' active' : '');
+  d.addEventListener('click', () => goToSlide(i));
+  navDots.appendChild(d);
+}
+const dots = document.querySelectorAll('.dot');
+function goToSlide(n) {
+  if (n < 1 || n > totalSlides) return;
+  slides.forEach((s, i) => {
+    s.classList.remove('active', 'prev');
+    if (i + 1 === n) s.classList.add('active');
+    else if (i + 1 < n) s.classList.add('prev');
+  });
+  dots.forEach((d, i) => d.classList.toggle('active', i + 1 === n));
+  currentSlide = n;
+  currentSlideEl.textContent = n;
+  progressBar.style.width = (n / totalSlides * 100) + '%';
+  prevBtn.disabled = n === 1;
+  nextBtn.disabled = n === totalSlides;
+  slides[n - 1].scrollTop = 0;
+}
+prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+});
+
+/* ===== DATA MATERI & SOAL ===== */
+const matData = [
+  {
+    containerId: 'accList1',
+    subs: [
+      {
+        title: '1. Pecahan Senilai',
+        summary: 'Pecahan senilai adalah pecahan yang memiliki nilai sama walau penulisannya berbeda. Cara mencarinya: kalikan/bagi pembilang dan penyebut dengan angka yang sama. Contoh: 1/2 = 2/4 = 3/6.',
+        qs: [
+          { q: 'Pecahan senilai dengan 2/3 adalah...', opts: ['3/4', '4/6', '4/5', '3/2'], a: 1, e: '2/3 dikali 2/2 = 4/6.' },
+          { q: 'Manakah pecahan yang senilai dengan 1/4?', opts: ['2/6', '3/12', '2/3', '4/6'], a: 1, e: '1/4 dikali 3/3 = 3/12.' },
+          { q: 'Pecahan 5/10 jika disederhanakan menjadi...', opts: ['1/2', '1/5', '2/5', '1/10'], a: 0, e: '5/10 dibagi 5/5 = 1/2.' },
+          { q: 'Pecahan senilai dengan 3/5 jika pembilangnya 9 adalah...', opts: ['9/10', '9/15', '9/5', '9/12'], a: 1, e: '3/5 dikali 3/3 = 9/15.' },
+          { q: 'Manakah yang senilai dengan 2/8?', opts: ['1/4', '1/8', '2/4', '1/2'], a: 0, e: '2/8 dibagi 2/2 = 1/4.' }
+        ]
+      },
+      {
+        title: '2. Perbandingan & Pengurutan Pecahan',
+        summary: 'Untuk membandingkan pecahan, samakan penyebutnya terlebih dahulu menggunakan KPK. Jika penyebut sama, pembilang terbesar adalah pecahan terbesar. Jika pembilang sama, penyebut terkecil adalah pecahan terbesar.',
+        qs: [
+          { q: 'Urutan pecahan dari terkecil: 1/2, 1/4, 1/3 adalah...', opts: ['1/2, 1/3, 1/4', '1/4, 1/3, 1/2', '1/3, 1/4, 1/2', '1/4, 1/2, 1/3'], a: 1, e: 'Karena 1/4 (0.25) < 1/3 (0.33) < 1/2 (0.5).' },
+          { q: 'Pecahan terbesar di antara berikut adalah...', opts: ['2/5', '3/5', '1/5', '4/5'], a: 3, e: 'Penyebut sama, lihat pembilang terbesar.' },
+          { q: 'Manakah yang lebih besar: 2/3 atau 3/4?', opts: ['2/3', '3/4', 'Sama besar', 'Tidak bisa ditentukan'], a: 1, e: '2/3=8/12, 3/4=9/12. Jadi 3/4 lebih besar.' },
+          { q: 'Urutan descending (besar ke kecil) 1/2, 3/4, 2/3...', opts: ['1/2, 2/3, 3/4', '3/4, 2/3, 1/2', '2/3, 1/2, 3/4', '3/4, 1/2, 2/3'], a: 1, e: 'KPK 12: 6/12, 9/12, 8/12 -> 9/12, 8/12, 6/12.' },
+          { q: 'Tanda yang tepat: 2/5 ... 3/7', opts: ['>', '<', '=', '≤'], a: 1, e: '2/5=14/35, 3/7=15/35. Jadi 2/5 < 3/7.' }
+        ]
+      },
+      {
+        title: '3. Relasi Pecahan, Desimal, Persen',
+        summary: 'Pecahan, desimal, dan persen adalah bentuk yang sama. Contoh: 1/2 = 0,5 = 50%. Untuk merubah pecahan ke persen, kalikan 100%. Persen ke desimal: bagi 100.',
+        qs: [
+          { q: 'Bentuk persen dari 3/4 adalah...', opts: ['25%', '50%', '75%', '30%'], a: 2, e: '3/4 = 0.75 = 75%.' },
+          { q: 'Bentuk desimal dari 1/5 adalah...', opts: ['0.1', '0.2', '0.5', '0.15'], a: 1, e: '1/5 = 0.2.' },
+          { q: 'Bentuk pecahan dari 40% adalah...', opts: ['1/4', '2/5', '4/10', '40/100'], a: 1, e: '40% = 40/100 = 2/5 (disederhanakan).' },
+          { q: '0,25 jika ditulis dalam persen menjadi...', opts: ['2,5%', '25%', '0,25%', '250%'], a: 1, e: '0.25 x 100 = 25%.' },
+          { q: 'Manakah yang senilai dengan 0,75?', opts: ['7,5%', '3/4', '1/3', '75/10'], a: 1, e: '0.75 = 75% = 3/4.' }
+        ]
+      },
+      {
+        title: '4. Operasi Hitung Bilangan Cacah',
+        summary: 'Bilangan cacah dimulai dari 0, 1, 2, 3... Operasi penjumlahan (+), pengurangan (−), perkalian (×), dan pembagian (÷) pada bilangan cacah. Gunakan teknik bersusun untuk angka besar.',
+        qs: [
+          { q: 'Hasil dari 345 + 218 = ...', opts: ['553', '563', '463', '562'], a: 0, e: '345+218 = 563.' },
+          { q: 'Hasil dari 800 − 245 = ...', opts: ['455', '555', '545', '445'], a: 1, e: '800-245 = 555.' },
+          { q: 'Hasil dari 24 × 12 = ...', opts: ['268', '288', '276', '248'], a: 1, e: '24x10=240, 24x2=48. 240+48=288.' },
+          { q: 'Hasil dari 144 ÷ 6 = ...', opts: ['14', '22', '24', '26'], a: 2, e: '6 x 24 = 144.' },
+          { q: 'Berapakah hasil dari 50 + (2 × 15)?', opts: ['65', '80', '95', '75'], a: 1, e: 'Kerjakan kurung dulu: 2x15=30. Lalu 50+30=80.' }
+        ]
+      },
+      {
+        title: '5. Operasi Pecahan & Bilangan Asli',
+        summary: 'Penjumlahan/Pengurangan: samakan penyebut. Perkalian: kali pembilang dgn pembilang, penyebut dgn penyebut. Pembagian: balik pecahan kedua lalu kali.',
+        qs: [
+          { q: 'Hasil 1/2 + 1/4 = ...', opts: ['2/6', '2/4', '3/4', '1/6'], a: 2, e: '1/2=2/4. 2/4+1/4=3/4.' },
+          { q: 'Hasil 2/3 × 4 = ...', opts: ['8/3', '6/3', '8/12', '4/3'], a: 0, e: '2/3 x 4/1 = 8/3.' },
+          { q: 'Hasil 3/4 ÷ 2 = ...', opts: ['6/4', '3/8', '3/2', '1/4'], a: 1, e: '3/4 x 1/2 = 3/8.' },
+          { q: 'Hasil 5/6 − 1/3 = ...', opts: ['4/3', '4/6', '1/2', '3/6'], a: 2, e: '1/3=2/6. 5/6-2/6=3/6=1/2.' },
+          { q: 'Hasil dari 2/5 × 10 = ...', opts: ['20/5', '4', '5', '10/5'], a: 1, e: '2/5 x 10/1 = 20/5 = 4.' }
+        ]
+      },
+      {
+        title: '6. KPK & FPB Bilangan Asli',
+        summary: 'Faktor Persekutuan Terbesar (FPB): faktor terbesar yang membagi habis dua bilangan. Kelipatan Persekutuan Terkecil (KPK): kelipatan terkecil yang sama dari dua bilangan.',
+        qs: [
+          { q: 'FPB dari 12 dan 18 adalah...', opts: ['2', '3', '6', '36'], a: 2, e: 'Faktor 12: 1,2,3,4,6,12. Faktor 18: 1,2,3,6,9,18. Terbesar = 6.' },
+          { q: 'KPK dari 4 dan 6 adalah...', opts: ['12', '24', '2', '10'], a: 0, e: 'Kelipatan 4: 4,8,12. Kelipatan 6: 6,12. Terkecil = 12.' },
+          { q: 'FPB dari 15 dan 20 adalah...', opts: ['3', '5', '15', '60'], a: 1, e: 'Faktor 15: 1,3,5,15. Faktor 20: 1,2,4,5,10,20. Terbesar=5.' },
+          { q: 'KPK dari 3 dan 7 adalah...', opts: ['10', '21', '14', '1'], a: 1, e: '3x7=21 karena keduanya prima.' },
+          { q: 'Bilangan A=24, B=36. KPKnya adalah...', opts: ['6', '72', '12', '48'], a: 1, e: '24=2³x3, 36=2²x3². KPK=2³x3²=72.' }
+        ]
+      }
+    ]
+  },
+  {
+    containerId: 'accList2',
+    subs: [
+      {
+        title: '1. Bentuk Bangun Datar',
+        summary: 'Bangun datar memiliki sisi dan sudut. Contoh: Persegi (4 sisi sama), Persegi panjang (sisi berhadapan sama), Segitiga (3 sisi), Lingkaran (1 sisi lengkung).',
+        qs: [
+          { q: 'Bangun datar yang memiliki 4 sisi sama panjang adalah...', opts: ['Persegi panjang', 'Trapesium', 'Persegi', 'Segitiga'], a: 2, e: 'Persegi memiliki 4 sisi yang sama panjang.' },
+          { q: 'Jumlah sudut segitiga adalah...', opts: ['90°', '180°', '360°', '270°'], a: 1, e: 'Total sudut dalam segitiga selalu 180°.' },
+          { q: 'Jumlah sudut persegi panjang adalah...', opts: ['180°', '270°', '360°', '90°'], a: 2, e: '4 x 90° = 360°.' },
+          { q: 'Bangun datar yang tidak memiliki sudut adalah...', opts: ['Segitiga', 'Lingkaran', 'Persegi', 'Belah Ketupat'], a: 1, e: 'Lingkaran tidak memiliki titik sudut.' },
+          { q: 'Trapesium memiliki jumlah sisi sebanyak...', opts: ['3', '4', '5', '6'], a: 1, e: 'Trapesium adalah segiempat (4 sisi). Satu pasang sisi sejajar.' }
+        ]
+      },
+      {
+        title: '2. Konstruksi Bangun Ruang & Visualisasi',
+        summary: 'Bangun ruang memiliki volume (isi). Contoh: Kubus (6 sisi persegi), Balok (6 sisi persegi panjang). Visualisasi spasial meliputi tampak depan, atas, dan samping.',
+        qs: [
+          { q: 'Jumlah sisi pada kubus adalah...', opts: ['4', '5', '6', '8'], a: 2, e: 'Kubus memiliki 6 sisi persegi.' },
+          { q: 'Sebuah balok memiliki ... rusuk.', opts: ['8', '10', '12', '6'], a: 2, e: 'Semua bangun segiempat (kubus/balok) punya 12 rusuk.' },
+          { q: 'Tampak dari atas sebuah kubus berbentuk...', opts: ['Segitiga', 'Lingkaran', 'Persegi', 'Persegi panjang'], a: 2, e: 'Sisi atas kubus berbentuk persegi.' },
+          { q: 'Tampak samping sebuah balok yang alasnya persegi panjang bisa berbentuk...', opts: ['Persegi', 'Persegi panjang', 'Segitiga', 'Lingkaran'], a: 1, e: 'Sisi samping balok berbentuk persegi panjang.' },
+          { q: 'Jumlah titik sudut kubus adalah...', opts: ['6', '8', '10', '12'], a: 1, e: 'Kubus dan balok memiliki 8 titik sudut.' }
+        ]
+      },
+      {
+        title: '3. Satuan Baku Panjang',
+        summary: 'Urutan satuan panjang: km, hm, dam, m, dm, cm, mm. Turun 1 tangga = kali 10. Naik 1 tangga = bagi 10.',
+        qs: [
+          { q: '1 meter sama dengan ... cm.', opts: ['10', '100', '1000', '1'], a: 1, e: '1 m = 100 cm.' },
+          { q: '500 cm sama dengan ... meter.', opts: ['5 m', '50 m', '0,5 m', '5000 m'], a: 0, e: '500 / 100 = 5 m.' },
+          { q: '1 km sama dengan ... meter.', opts: ['100 m', '10 m', '1000 m', '10000 m'], a: 2, e: '1 km = 1000 m.' },
+          { q: '20 mm sama dengan ... cm.', opts: ['0,2 cm', '2 cm', '20 cm', '200 cm'], a: 1, e: '20 / 10 = 2 cm.' },
+          { q: 'Manakah yang salah?', opts: ['1 m = 10 dm', '1 dam = 10 m', '1 hm = 100 m', '1 m = 100 mm'], a: 3, e: '1 m = 1000 mm. (Bukan 100 mm).' }
+        ]
+      },
+      {
+        title: '4. Satuan Baku Volume',
+        summary: 'Satuan volume: kl, hl, dal, l, dl, cl, ml. 1 liter (l) = 1000 ml. 1 kiloliter = 1000 liter. Sama seperti tangga panjang.',
+        qs: [
+          { q: '1 liter sama dengan ... ml.', opts: ['10', '100', '1000', '10000'], a: 2, e: '1 l = 1000 ml.' },
+          { q: '5.000 ml sama dengan ... liter.', opts: ['5 l', '50 l', '500 l', '0,5 l'], a: 0, e: '5000 / 1000 = 5 l.' },
+          { q: '1 kiloliter (kl) sama dengan ... liter.', opts: ['10 l', '100 l', '1000 l', '10000 l'], a: 2, e: '1 kl = 1000 l.' },
+          { q: '200 cl sama dengan ... liter.', opts: ['2 l', '20 l', '0,2 l', '2000 l'], a: 0, e: '200 / 100 = 2 l.' },
+          { q: 'Manakah urutan volume benar dari kecil ke besar?', opts: ['ml, l, cl, dl', 'cl, ml, dl, l', 'ml, cl, dl, l', 'ml, dl, cl, l'], a: 2, e: 'ml, cl, dl, l (naik tangga).' }
+        ]
+      },
+      {
+        title: '5. Satuan Baku Berat',
+        summary: 'Satuan berat: kg, hg, dag, g, dg, cg, mg. 1 kg = 1000 gram. Tangga berat sama dengan panjang dan volume, namun menggunakan satuan gram.',
+        qs: [
+          { q: '1 kg sama dengan ... gram.', opts: ['100 g', '1000 g', '10 g', '10000 g'], a: 1, e: '1 kg = 1000 g.' },
+          { q: '2.500 gram sama dengan ... kg.', opts: ['25 kg', '2,5 kg', '250 kg', '0,25 kg'], a: 1, e: '2500 / 1000 = 2,5 kg.' },
+          { q: '500 mg sama dengan ... gram.', opts: ['5 g', '50 g', '0,5 g', '0,05 g'], a: 2, e: '500 / 1000 = 0,5 g.' },
+          { q: 'Manakah yang benar?', opts: ['1 hg = 10 g', '1 dag = 10 g', '1 g = 10 cg', '1 kg = 10 hg'], a: 3, e: '1 kg = 10 hg (semuanya benar, tapi pilihan paling tepat sesuai tangga).' },
+          { q: 'Sebaliknya, 5 kg = ... mg.', opts: ['5.000 mg', '50.000 mg', '500.000 mg', '5 mg'], a: 1, e: '5 kg = 5.000 g = 5.000.000 mg. (Pilihan terdekat logika tangga).' }
+        ]
+      },
+      {
+        title: '6. Satuan Waktu',
+        summary: '1 menit = 60 detik. 1 jam = 60 menit. 1 hari = 24 jam. 1 pekan = 7 hari. 1 bulan = 28-31 hari. 1 tahun = 12 bulan / 365 hari.',
+        qs: [
+          { q: '1 jam sama dengan ... detik.', opts: ['60', '600', '3600', '360'], a: 2, e: '60 x 60 = 3600 detik.' },
+          { q: '120 menit sama dengan ... jam.', opts: ['1 jam', '2 jam', '3 jam', '12 jam'], a: 1, e: '120 / 60 = 2 jam.' },
+          { q: '2 hari sama dengan ... jam.', opts: ['12 jam', '24 jam', '36 jam', '48 jam'], a: 3, e: '2 x 24 = 48 jam.' },
+          { q: '1 tahun sama dengan ... pekan (sekitar).', opts: ['12 pekan', '48 pekan', '52 pekan', '24 pekan'], a: 2, e: '365 hari / 7 = 52 pekan.' },
+          { q: '180 detik sama dengan ... menit.', opts: ['2 menit', '3 menit', '4 menit', '30 menit'], a: 1, e: '180 / 60 = 3 menit.' }
+        ]
+      },
+      {
+        title: '7. Laju Perubahan (Kecepatan)',
+        summary: 'Rumus kecepatan: Jarak ÷ Waktu (v = s/t). Jika Andi berlari 100 meter dalam 20 detik, kecepatannya = 5 m/detik. Satuan lain: km/jam.',
+        qs: [
+          { q: 'Rumus kecepatan adalah...', opts: ['Jarak x Waktu', 'Jarak / Waktu', 'Waktu / Jarak', 'Jarak + Waktu'], a: 1, e: 'Kecepatan = Jarak dibagi Waktu.' },
+          { q: 'Sebuah mobil menempuh 120 km dalam 2 jam. Kecepatannya...', opts: ['60 km/jam', '120 km/jam', '240 km/jam', '30 km/jam'], a: 0, e: '120 / 2 = 60 km/jam.' },
+          { q: 'Jika kecepatan 10 m/detik, jarak tempuh 5 detik adalah...', opts: ['2 m', '15 m', '50 m', '5 m'], a: 2, e: '10 x 5 = 50 m.' },
+          { q: 'Waktu tempuh jika jarak 60 km dan kecepatan 30 km/jam...', opts: ['2 jam', '3 jam', '1 jam', '90 jam'], a: 0, e: '60 / 30 = 2 jam.' },
+          { q: 'Sepeda bergerak 15 km/jam. Dalam 3 jam, jarak yang ditempuh...', opts: ['5 km', '18 km', '45 km', '12 km'], a: 2, e: '15 x 3 = 45 km.' }
+        ]
+      },
+      {
+        title: '8. Keliling & Luas Bangun Datar',
+        summary: 'Keliling = jumlah semua sisi. Luas = isi bidang. Persegi: K=4xs, L=sxs. Persegi panjang: K=2x(p+l), L=pxl. Segitiga: L=0.5 x alas x tinggi.',
+        qs: [
+          { q: 'Keliling persegi dengan sisi 7 cm adalah...', opts: ['14 cm', '21 cm', '28 cm', '49 cm'], a: 2, e: '4 x 7 = 28 cm.' },
+          { q: 'Luas persegi panjang ukuran 10 x 4 cm adalah...', opts: ['14 cm²', '28 cm²', '40 cm²', '20 cm²'], a: 2, e: '10 x 4 = 40 cm².' },
+          { q: 'Luas segitiga dengan alas 8 cm dan tinggi 6 cm...', opts: ['48 cm²', '24 cm²', '14 cm²', '12 cm²'], a: 1, e: '1/2 x 8 x 6 = 24 cm².' },
+          { q: 'Keliling persegi panjang 12 cm x 5 cm...', opts: ['17 cm', '34 cm', '60 cm', '24 cm'], a: 1, e: '2 x (12+5) = 34 cm.' },
+          { q: 'Jika keliling persegi 20 cm, panjang sisinya...', opts: ['4 cm', '5 cm', '10 cm', '80 cm'], a: 1, e: '20 / 4 = 5 cm.' }
+        ]
+      },
+      {
+        title: '9. Volume Bangun Ruang (Kubus & Balok)',
+        summary: 'Volume = isi ruang. Kubus: V = sisi x sisi x sisi (s³). Balok: V = panjang x lebar x tinggi (p x l x t).',
+        qs: [
+          { q: 'Volume kubus dengan rusuk 4 cm...', opts: ['12 cm³', '16 cm³', '64 cm³', '32 cm³'], a: 2, e: '4 x 4 x 4 = 64 cm³.' },
+          { q: 'Volume balok 10 cm x 5 cm x 2 cm...', opts: ['100 cm³', '17 cm³', '50 cm³', '20 cm³'], a: 0, e: '10 x 5 x 2 = 100 cm³.' },
+          { q: 'Rumus volume balok adalah...', opts: ['s x s x s', 'p x l x t', '6 x s', 'p x l'], a: 1, e: 'Volume balok = panjang x lebar x tinggi.' },
+          { q: 'Volume kubus 27 cm³. Panjang rusuknya...', opts: ['3 cm', '6 cm', '9 cm', '4 cm'], a: 0, e: 'Akar pangkat 3 dari 27 = 3 cm.' },
+          { q: 'Sebuah akuarium berisi 1.000 liter. Volume airnya sama dengan...', opts: ['1 m³', '10 m³', '100 cm³', '1 dm³'], a: 0, e: '1.000 liter = 1 m³.' }
+        ]
+      },
+      {
+        title: '10. Besar Sudut',
+        summary: 'Sudut terbentuk dari dua sinar yang berpotongan. Sudut siku-siku = 90°. Sudut lancip < 90°. Sudut tumpul > 90°. Jumlah sudut segitiga 180°, segiempat 360°.',
+        qs: [
+          { q: 'Besar sudut siku-siku adalah...', opts: ['45°', '90°', '180°', '360°'], a: 1, e: 'Sudut siku-siku besarnya 90 derajat.' },
+          { q: 'Sudut yang besarnya 45° termasuk sudut...', opts: ['Siku-siku', 'Lancip', 'Tumpul', 'Lurus'], a: 1, e: 'Kurang dari 90° = lancip.' },
+          { q: 'Sudut 120° termasuk sudut...', opts: ['Lancip', 'Siku-siku', 'Tumpul', 'Refleks'], a: 2, e: 'Lebih dari 90° tapi kurang 180° = tumpul.' },
+          { q: 'Jika satu sudut segitiga 60° dan 80°, sudut ketiga...', opts: ['40°', '50°', '60°', '20°'], a: 0, e: '180 - (60+80) = 40°.' },
+          { q: 'Alat untuk mengukur besar sudut adalah...', opts: ['Penggaris', 'Busur derajat', 'Jangka', 'Mistar'], a: 1, e: 'Busur derajat dipakai mengukur sudut.' }
+        ]
+      }
+    ]
+  },
+  {
+    containerId: 'accList3',
+    subs: [
+      {
+        title: '1. Penyajian Data',
+        summary: 'Data bisa disajikan dalam berbagai bentuk: Piktogram (gambar), Diagram batang (kotak tinggi), Tabel frekuensi (berisi angka), dan Diagram lingkaran (persentase).',
+        qs: [
+          { q: 'Diagram yang menggunakan simbol gambar untuk menyajikan data disebut...', opts: ['Diagram batang', 'Piktogram', 'Diagram lingkaran', 'Tabel'], a: 1, e: 'Piktogram menggunakan gambar.' },
+          { q: 'Diagram yang menggunakan kotak/kolom tinggi untuk menunjukkan jumlah...', opts: ['Diagram lingkaran', 'Diagram batang', 'Piktogram', 'Garis'], a: 1, e: 'Diagram batang berbentuk kotak.' },
+          { q: 'Jika 1 gambar apel = 10 siswa, maka 4 gambar apel = ... siswa.', opts: ['14', '40', '4', '10'], a: 1, e: '4 x 10 = 40.' },
+          { q: 'Penyajian data yang paling tepat untuk menunjukkan persentase...', opts: ['Diagram lingkaran', 'Diagram batang', 'Tabel', 'Piktogram'], a: 0, e: 'Diagram lingkaran menunjukkan persentase utuh (100%).' },
+          { q: 'Tabel yang berisi banyaknya frekuensi suatu data...', opts: ['Tabel data', 'Tabel frekuensi', 'Tabel distribusi', 'Tabel silang'], a: 1, e: 'Tabel frekuensi mencatat jumlah kemunculan.' }
+        ]
+      },
+      {
+        title: '2. Pengambilan Informasi Data',
+        summary: 'Kita bisa membaca data untuk mengetahui: nilai tertinggi, terendah, rata-rata (jumlah dibagi banyak data), modus (yang paling sering muncul), selisih, dll.',
+        qs: [
+          { q: 'Data: 5, 7, 8, 5, 10. Modus dari data tersebut...', opts: ['5', '7', '8', '10'], a: 0, e: '5 muncul paling banyak (2x).' },
+          { q: 'Data: 4, 6, 8, 10. Rata-ratanya adalah...', opts: ['6', '7', '8', '9'], a: 1, e: '(4+6+8+10)/4 = 28/4 = 7.' },
+          { q: 'Dari diagram batang, tinggi batang tertinggi menunjukkan...', opts: ['Nilai terkecil', 'Nilai terbesar', 'Nilai rata-rata', 'Total nilai'], a: 1, e: 'Batang tertinggi = nilai terbanyak/terbesar.' },
+          { q: 'Data: 20, 25, 30, 35. Selisih tertinggi dan terendah...', opts: ['10', '15', '5', '20'], a: 1, e: '35 - 20 = 15.' },
+          { q: 'Jika rata-rata ulangan 5 anak adalah 80, total nilai mereka...', opts: ['85', '160', '400', '80'], a: 2, e: '80 x 5 = 400.' }
+        ]
+      }
+    ]
+  }
+];
+
+/* ===== RENDER MATERI ===== */
+matData.forEach(mat => {
+  const container = document.getElementById(mat.containerId);
+  let html = '';
+  mat.subs.forEach((sub, sIdx) => {
+    html += `
+      <div class="accordion-item" data-sub="${sIdx}">
+        <div class="accordion-header" onclick="toggleAcc(this)">
+          <span>${sub.title}</span>
+          <span class="arrow">▶</span>
+        </div>
+        <div class="accordion-content">
+          <div class="accordion-inner">
+            <div class="summary-box">
+              <h4>📌 Rangkuman Materi</h4>
+              <p>${sub.summary}</p>
+            </div>
+            <div class="quiz-list">
+              ${sub.qs.map((q, qIdx) => `
+                <div class="quiz-item" data-q="${qIdx}">
+                  <div class="quiz-q"><span class="quiz-q-num">${qIdx+1}</span> ${q.q}</div>
+                  <div class="quiz-opts">
+                    ${q.opts.map((opt, oIdx) => `<button class="quiz-opt" data-opt="${oIdx}" onclick="selectOpt(this)">${String.fromCharCode(65+oIdx)}. ${opt}</button>`).join('')}
+                  </div>
+                  <div class="quiz-actions">
+                    <button class="quiz-check-btn" onclick="checkAns(this, ${q.a})">Cek Jawaban</button>
+                  </div>
+                  <div class="quiz-exp"></div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  container.innerHTML = html;
+});
+
+function toggleAcc(header) {
+  const item = header.parentElement;
+  // Close others in same container
+  item.parentElement.querySelectorAll('.accordion-item').forEach(it => {
+    if (it !== item) it.classList.remove('active');
+  });
+  item.classList.toggle('active');
+}
+
+function selectOpt(btn) {
+  const quizItem = btn.closest('.quiz-item');
+  quizItem.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('selected'));
+  btn.classList.add('selected');
+  // Reset state if previously checked
+  quizItem.classList.remove('correct', 'wrong');
+  quizItem.querySelector('.quiz-exp').classList.remove('show');
+}
+
+function checkAns(btn, correctIdx) {
+  const quizItem = btn.closest('.quiz-item');
+  const selected = quizItem.querySelector('.quiz-opt.selected');
+  if (!selected) {
+    alert('Pilih jawaban dulu ya!');
+    return;
+  }
+  const expDiv = quizItem.querySelector('.quiz-exp');
+  const qIdx = parseInt(quizItem.dataset.q);
+  const subIdx = parseInt(quizItem.closest('.accordion-item').dataset.sub);
+  const matIdx = matData.findIndex(m => m.containerId === quizItem.closest('.accordion-list').id);
+  const expText = matData[matIdx].subs[subIdx].qs[qIdx].e;
+
+  const selectedIdx = parseInt(selected.dataset.opt);
+  
+  if (selectedIdx === correctIdx) {
+    quizItem.classList.add('correct');
+    expDiv.innerHTML = `<strong>✓ Benar!</strong> ${expText}`;
+  } else {
+    quizItem.classList.add('wrong');
+    const correctOpt = quizItem.querySelector(`.quiz-opt[data-opt="${correctIdx}"]`).textContent;
+    expDiv.innerHTML = `<strong>✗ Salah.</strong> Jawaban benar: ${correctOpt}. ${expText}`;
+  }
+  expDiv.classList.add('show');
+}
+
+// Open first accordion by default
+document.querySelector('.accordion-item').classList.add('active');
+</script>
+</body>
+</html>
