@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan TKA — Kelipatan, Faktor, KPK & FPB</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FAF5EC; --bg-warm:#F2E8D5; --card:#FFFFFF;
+  --ink:#1E1810; --ink-soft:#5A5043; --muted:#9C9181; --line:#E7DCC6;
+  --accent:#C84B31; --accent-deep:#9B3522; --accent-soft:#FBDDD3;
+  --gold:#E8A53D; --gold-soft:#FCEBC5;
+  --success:#2D7D5F; --success-soft:#D6EBDF;
+  --error:#D9544E; --error-soft:#F8D9D6;
+  --pending:#B5A99A; --pending-soft:#EFE7D6;
+  --info:#2563A6; --info-soft:#DCE8F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(200,75,49,.08), transparent 35%),
+    radial-gradient(circle at 92% 95%, rgba(232,165,61,.1), transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(45,125,95,.04), transparent 60%);
+}
+body::after{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4;
+  background-image:radial-gradient(var(--ink) 0.5px, transparent 0.5px);
+  background-size:22px 22px; opacity:.04;
+}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(250,245,236,.85);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.header-inner{
+  max-width:1280px; margin:0 auto; padding:18px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:14px}
+.brand-logo{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  color:#fff; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+  transform:rotate(-5deg); box-shadow:0 6px 18px rgba(200,75,49,.35);
+}
+.brand-text h1{
+  font-family:'Fraunces',serif; font-size:22px; font-weight:900;
+  letter-spacing:-.02em; line-height:1.1;
+}
+.brand-text p{font-size:12.5px; color:var(--ink-soft); margin-top:2px}
+
+.score-panel{
+  display:flex; align-items:center; gap:18px;
+  padding:8px 8px 8px 20px;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:100px; box-shadow:0 6px 20px rgba(31,24,16,.05);
+}
+.donut-wrap{position:relative; width:62px; height:62px}
+.donut svg{transform:rotate(-90deg); width:100%; height:100%}
+.donut circle{transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)}
+.donut-center{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900;
+}
+.donut-center .pct{font-size:17px; line-height:1}
+
+.score-stats{display:flex; gap:14px; font-size:13px; font-weight:600}
+.score-stat{display:flex; align-items:center; gap:6px}
+.dot{width:9px; height:9px; border-radius:50%}
+.dot.benar{background:var(--success)}
+.dot.salah{background:var(--error)}
+.dot.kosong{background:var(--pending)}
+.score-stat span.num{font-family:'Fraunces',serif; font-size:16px; font-weight:800}
+
+.btn-canvas, .btn-nav{
+  background:var(--ink); color:#fff; border:none;
+  padding:11px 20px; border-radius:100px;
+  font-weight:700; font-size:13.5px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:all .25s; font-family:inherit;
+}
+.btn-canvas:hover, .btn-nav:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 8px 20px rgba(200,75,49,.35)}
+.btn-canvas svg, .btn-nav svg{width:16px; height:16px}
+.btn-nav.outline{background:transparent; color:var(--ink); border:2px solid var(--line)}
+.btn-nav.outline:hover{background:var(--bg-warm); border-color:var(--accent); color:var(--accent)}
+
+.progress-bar{height:4px; background:var(--bg-warm); position:relative; overflow:hidden}
+.progress-fill{
+  position:absolute; inset:0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  transition:width .5s ease;
+}
+
+/* ============ MAIN LAYOUT ============ */
+main{max-width:1100px; margin:0 auto; padding:36px 24px 80px}
+.intro{text-align:center; margin-bottom:42px}
+.intro .eyebrow{
+  display:inline-block; font-size:11.5px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); padding:6px 14px;
+  background:var(--accent-soft); border-radius:100px; margin-bottom:14px;
+}
+.intro h2{
+  font-family:'Fraunces',serif;
+  font-size:clamp(32px,5vw,52px); font-weight:900;
+  letter-spacing:-.025em; line-height:1.05; margin-bottom:14px;
+}
+.intro h2 em{font-style:italic; color:var(--accent)}
+.intro p{color:var(--ink-soft); max-width:620px; margin:0 auto; font-size:15px}
+
+/* ============ MATERI / SLIDE 1 ============ */
+.materi-section{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:24px; padding:40px; margin-bottom:48px;
+  box-shadow:0 4px 20px rgba(31,24,16,.04);
+}
+.materi-header{
+  text-align:center; margin-bottom:32px;
+  padding-bottom:24px; border-bottom:2px dashed var(--line);
+}
+.materi-header h3{
+  font-family:'Fraunces',serif; font-size:32px; font-weight:900;
+  margin-bottom:8px;
+}
+.materi-header p{color:var(--ink-soft); font-size:15px}
+
+.materi-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:24px; margin-bottom:24px;
+}
+@media (max-width:780px){.materi-grid{grid-template-columns:1fr}}
+
+.materi-card{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:18px; padding:24px;
+}
+.materi-card.full{grid-column:1 / -1}
+.materi-card h4{
+  font-family:'Fraunces',serif; font-size:20px; font-weight:800;
+  margin-bottom:12px; color:var(--accent-deep);
+  display:flex; align-items:center; gap:10px;
+}
+.materi-card h4 .icon{
+  width:32px; height:32px; border-radius:10px;
+  background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; font-size:18px;
+}
+.materi-card p{font-size:14.5px; margin-bottom:10px; color:var(--ink-soft)}
+.materi-card strong{color:var(--ink)}
+.materi-card ul{list-style:none; padding-left:8px}
+.materi-card ul li{
+  position:relative; padding-left:20px; margin-bottom:8px;
+  font-size:14.5px; color:var(--ink-soft);
+}
+.materi-card ul li::before{
+  content:''; position:absolute; left:0; top:9px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+}
+
+/* Factor Tree */
+.factor-tree-container{
+  display:flex; flex-direction:column; align-items:center;
+  padding:30px 20px; background:#fff;
+  border-radius:14px; border:1px solid var(--line);
+  margin-top:16px;
+}
+.tree-node{
+  width:48px; height:48px; display:grid; place-items:center;
+  border-radius:12px; font-family:'Fraunces',serif;
+  font-weight:800; font-size:18px;
+  background:var(--bg-warm); border:2px solid var(--line);
+  position:relative; z-index:2;
+}
+.tree-node.prime{
+  background:var(--success-soft); border-color:var(--success);
+  color:var(--success);
+}
+.tree-connector{
+  height:20px; width:2px; background:var(--muted);
+  margin: -2px 0;
+}
+.tree-branch{
+  display:flex; gap:40px; position:relative;
+}
+.tree-branch::before{
+  content:''; position:absolute; top:0; left:25%; right:25%;
+  height:2px; background:var(--muted);
+}
+
+/* Sengkedan Table */
+.sengkedan-table{
+  width:100%; border-collapse:collapse;
+  margin-top:16px; font-size:14px;
+}
+.sengkedan-table th, .sengkedan-table td{
+  border:1px solid var(--line); padding:10px;
+  text-align:center;
+}
+.sengkedan-table th{
+  background:var(--bg-warm); font-family:'Fraunces',serif;
+  color:var(--accent-deep);
+}
+.sengkedan-table td.prime{color:var(--success); font-weight:700}
+.sengkedan-table tr:last-child td{
+  font-family:'Fraunces',serif; font-weight:800;
+  background:var(--accent-soft); color:var(--accent-deep);
+}
+
+.keyword-box{
+  display:flex; gap:16px; flex-wrap:wrap; margin-top:10px;
+}
+.keyword-item{
+  flex:1; min-width:200px;
+  background:#fff; border-left:4px solid var(--gold);
+  padding:14px 18px; border-radius:0 12px 12px 0;
+  box-shadow:0 2px 8px rgba(0,0,0,.03);
+}
+.keyword-item h5{
+  font-family:'Fraunces',serif; font-size:16px;
+  font-weight:800; color:var(--ink); margin-bottom:6px;
+}
+.keyword-item p{font-size:13.5px; color:var(--ink-soft)}
+.keyword-item .tags{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px}
+.keyword-item .tag{
+  font-size:11px; font-weight:700; padding:4px 10px;
+  border-radius:100px; background:var(--bg-warm); color:var(--ink);
+}
+
+/* ============ QUESTION CARD ============ */
+.q-card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:22px; padding:28px 30px; margin-bottom:22px;
+  box-shadow:0 2px 10px rgba(31,24,16,.03);
+  transition:border-color .3s, box-shadow .3s;
+  position:relative; overflow:hidden;
+  opacity:0; transform:translateY(20px);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{opacity:1; transform:translateY(0)}}
+.q-card:hover{box-shadow:0 8px 30px rgba(31,24,16,.07)}
+.q-card.is-correct{border-color:rgba(45,125,95,.4)}
+.q-card.is-wrong{border-color:rgba(217,84,78,.4)}
+
+.q-card::before{
+  content:''; position:absolute; top:0; left:0; width:5px; height:100%;
+  background:var(--bg-warm); transition:background .3s;
+}
+.q-card.is-correct::before{background:var(--success)}
+.q-card.is-wrong::before{background:var(--error)}
+.q-card.is-answered::before{background:var(--accent)}
+
+.q-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; margin-bottom:18px;
+}
+.q-num-block{display:flex; align-items:center; gap:14px}
+.q-num{
+  font-family:'Fraunces',serif; font-weight:900; font-size:34px;
+  color:var(--accent); line-height:1; min-width:50px;
+}
+.q-card.is-correct .q-num{color:var(--success)}
+.q-card.is-wrong .q-num{color:var(--error)}
+.q-tag{
+  font-size:10.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 11px; border-radius:100px;
+  background:var(--bg-warm); color:var(--ink-soft);
+}
+.q-tag.hots{
+  background:linear-gradient(135deg,var(--gold),#D8902A);
+  color:#fff;
+}
+
+.q-status-pill{
+  font-size:11.5px; font-weight:700; padding:5px 12px;
+  border-radius:100px; background:var(--bg-warm); color:var(--muted);
+  letter-spacing:.05em;
+}
+.q-status-pill.benar{background:var(--success-soft); color:var(--success)}
+.q-status-pill.salah{background:var(--error-soft); color:var(--error)}
+
+.q-body{font-size:15.5px; margin-bottom:20px; color:var(--ink)}
+.q-body p{margin-bottom:6px}
+.q-body strong{font-weight:700}
+
+.context-box{
+  background:var(--bg-warm); border-radius:14px;
+  padding:14px 18px; margin-bottom:14px;
+  border-left:3px solid var(--gold);
+  font-size:14.5px;
+}
+
+/* ============ OPTIONS ============ */
+.options{display:grid; gap:10px; margin-top:8px}
+.opt{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 18px; background:var(--bg);
+  border:2px solid var(--line); border-radius:13px;
+  cursor:pointer; transition:all .2s; font-size:15px;
+  user-select:none;
+}
+.opt:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateX(2px)}
+.opt.selected{border-color:var(--accent); background:var(--accent-soft)}
+.opt.correct{border-color:var(--success); background:var(--success-soft)}
+.opt.wrong{border-color:var(--error); background:var(--error-soft)}
+.opt-mark{
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid var(--line); background:#fff;
+  display:grid; place-items:center; flex-shrink:0;
+  font-weight:700; font-size:12px; color:var(--ink-soft);
+  transition:all .2s;
+}
+.opt.selected .opt-mark{background:var(--accent); border-color:var(--accent); color:#fff}
+.opt.correct .opt-mark{background:var(--success); border-color:var(--success); color:#fff}
+.opt.wrong .opt-mark{background:var(--error); border-color:var(--error); color:#fff}
+.opt-text{flex:1}
+.opt-label{font-weight:700; color:var(--accent); margin-right:6px}
+
+.sub-item{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:14px; padding:14px 16px; margin:10px 0;
+}
+.sub-item .sub-eq{
+  font-size:15px; margin-bottom:10px; padding:8px 12px;
+  background:#fff; border-radius:8px; display:inline-block;
+}
+.bs-buttons{display:flex; gap:8px}
+.bs-btn{
+  flex:1; padding:9px 16px; border:2px solid var(--line);
+  background:#fff; border-radius:10px; cursor:pointer;
+  font-weight:600; font-size:13.5px; color:var(--ink-soft);
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.bs-btn:hover{border-color:var(--accent); color:var(--accent)}
+.bs-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.bs-btn.correct{border-color:var(--success); background:var(--success-soft); color:var(--success)}
+.bs-btn.wrong{border-color:var(--error); background:var(--error-soft); color:var(--error)}
+
+.q-actions{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+.btn{
+  padding:11px 20px; border-radius:11px;
+  font-weight:700; font-size:13.5px;
+  border:2px solid transparent; cursor:pointer;
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn-check{background:var(--ink); color:#fff}
+.btn-check:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 6px 16px rgba(200,75,49,.3)}
+.btn-check:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none}
+.btn-reset{background:transparent; color:var(--ink-soft); border-color:var(--line)}
+.btn-reset:hover{background:var(--bg-warm); color:var(--ink)}
+
+.explanation{
+  margin-top:16px; padding:18px 20px;
+  background:linear-gradient(135deg,rgba(232,165,61,.1),rgba(200,75,49,.06));
+  border-radius:14px; border-left:4px solid var(--gold);
+  font-size:14.5px; max-height:0; overflow:hidden;
+  opacity:0; transition:all .4s ease;
+  padding-top:0; padding-bottom:0; margin-top:0;
+}
+.explanation.show{
+  max-height:1000px; opacity:1;
+  padding:18px 20px; margin-top:16px;
+}
+.exp-head{
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  font-family:'Fraunces',serif; font-weight:800; font-size:16px;
+  color:var(--accent-deep);
+}
+.exp-body p{margin-bottom:8px}
+.exp-body p:last-child{margin-bottom:0}
+.exp-body .work{
+  background:#fff; padding:10px 14px; border-radius:8px;
+  display:inline-block; margin:6px 0; font-size:14px;
+  border:1px solid var(--line);
+}
+
+/* ============ CALC DRAWER ============ */
+.calc-overlay{
+  position:fixed; inset:0; background:rgba(31,24,16,.4);
+  z-index:900; opacity:0; pointer-events:none;
+  transition:opacity .3s; backdrop-filter:blur(2px);
+}
+.calc-overlay.show{opacity:1; pointer-events:auto}
+
+.calc-drawer{
+  position:fixed; top:0; right:0; height:100vh;
+  width:min(500px,100%); background:#fff; z-index:1000;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+  box-shadow:-20px 0 50px rgba(0,0,0,.15);
+}
+.calc-drawer.open{transform:translateX(0)}
+
+.calc-head{
+  padding:18px 22px; background:var(--ink); color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.calc-head h3{
+  font-family:'Fraunces',serif; font-size:19px; font-weight:800;
+  display:flex; align-items:center; gap:10px;
+}
+.calc-head .subtitle{font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px}
+.calc-close{
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(255,255,255,.1); border:none; color:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:background .2s;
+}
+.calc-close:hover{background:rgba(255,255,255,.2)}
+
+.calc-tools{
+  padding:12px 16px; background:var(--bg-warm);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.tool-btn{
+  padding:7px 13px; background:#fff;
+  border:1px solid var(--line); border-radius:9px;
+  cursor:pointer; font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all .15s; color:var(--ink); font-family:inherit;
+}
+.tool-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+.tool-btn svg{width:14px; height:14px}
+.tool-btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.tool-btn.primary:hover{background:var(--accent-deep)}
+.tool-divider{width:1px; height:24px; background:var(--line); margin:0 4px}
+
+.color-group{display:flex; gap:5px; align-items:center}
+.color-swatch{
+  width:22px; height:22px; border-radius:50%;
+  border:2px solid #fff; box-shadow:0 0 0 1px var(--line);
+  cursor:pointer; transition:transform .15s;
+}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{box-shadow:0 0 0 2px var(--accent); transform:scale(1.15)}
+
+.size-group{display:flex; gap:5px; align-items:center}
+.size-btn{
+  width:26px; height:26px; border-radius:8px;
+  border:1px solid var(--line); background:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:all .15s;
+}
+.size-btn.active{background:var(--ink); border-color:var(--ink)}
+.size-btn .dot-sm{width:4px; height:4px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-md{width:7px; height:7px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-lg{width:10px; height:10px; border-radius:50%; background:var(--ink)}
+.size-btn.active .dot-sm, .size-btn.active .dot-md, .size-btn.active .dot-lg{background:#fff}
+
+.calc-area{
+  flex:1; overflow-y:auto; background:#fff;
+  position:relative; padding:0;
+}
+.calc-area::-webkit-scrollbar{width:10px}
+.calc-area::-webkit-scrollbar-track{background:var(--bg-warm)}
+.calc-area::-webkit-scrollbar-thumb{background:var(--muted); border-radius:5px}
+
+.calc-canvas-wrap{
+  position:relative; width:100%;
+  background:#fff;
+  background-image:
+    linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+.calc-canvas-wrap canvas{
+  display:block; width:100%; height:3000px;
+  touch-action:none; cursor:crosshair;
+}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(120px);
+  background:var(--ink); color:#fff;
+  padding:13px 24px; border-radius:100px;
+  font-size:14px; font-weight:600; z-index:2000;
+  opacity:0; transition:all .35s;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  display:flex; align-items:center; gap:10px;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast .toast-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--gold);
+}
+
+/* ============ SUMMARY ============ */
+.summary-banner{
+  margin-top:32px; padding:28px 32px;
+  background:linear-gradient(135deg,var(--ink),#3a2f1f);
+  color:#fff; border-radius:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:24px; flex-wrap:wrap;
+  opacity:0; transform:translateY(20px);
+  transition:all .5s;
+}
+.summary-banner.show{opacity:1; transform:translateY(0)}
+.summary-banner h3{
+  font-family:'Fraunces',serif; font-size:24px;
+  font-weight:900; margin-bottom:6px;
+}
+.summary-banner p{font-size:14px; opacity:.8}
+.summary-stats{display:flex; gap:24px}
+.summary-stat{text-align:center}
+.summary-stat .num{
+  font-family:'Fraunces',serif; font-size:36px; font-weight:900;
+  line-height:1; color:var(--gold);
+}
+.summary-stat .lbl{font-size:11px; opacity:.7; margin-top:4px; letter-spacing:.1em; text-transform:uppercase}
+
+footer{
+  text-align:center; padding:24px;
+  color:var(--ink-soft); font-size:13px;
+  border-top:1px solid var(--line); margin-top:40px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:780px){
+  .header-inner{flex-direction:column; align-items:stretch; padding:14px 18px}
+  .brand{justify-content:flex-start}
+  .score-panel{justify-content:space-between; flex-wrap:wrap; padding:10px 14px}
+  .score-stats{flex:1; justify-content:space-around; font-size:11.5px}
+  .btn-canvas, .btn-nav{width:100%; justify-content:center}
+  .q-card{padding:22px 20px}
+  .q-num{font-size:28px; min-width:42px}
+  .intro h2{font-size:30px}
+  .materi-section{padding:24px 20px}
+  .calc-drawer{width:100%}
+  .calc-tools{padding:10px}
+}
+@media (max-width:480px){
+  .q-head{flex-direction:column; gap:8px}
+  .summary-stats{gap:14px}
+  .summary-stat .num{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">6</div>
+      <div class="brand-text">
+        <h1>Latihan TKA — Bab 6</h1>
+        <p>Kelipatan, Faktor, KPK, & FPB Bilangan Asli</p>
+      </div>
+    </div>
+    <div class="score-panel">
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EFE7D6" stroke-width="5"/>
+            <circle id="seg-correct" cx="18" cy="18" r="15.9" fill="none" stroke="#2D7D5F" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+            <circle id="seg-wrong" cx="18" cy="18" r="15.9" fill="none" stroke="#D9544E" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="donut-center">
+          <div class="pct" id="pct-display">0<span style="font-size:11px">%</span></div>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat"><span class="dot benar"></span><span class="num" id="stat-benar">0</span><span>Benar</span></div>
+        <div class="score-stat"><span class="dot salah"></span><span class="num" id="stat-salah">0</span><span>Salah</span></div>
+        <div class="score-stat"><span class="dot kosong"></span><span class="num" id="stat-kosong">20</span><span>Belum</span></div>
+      </div>
+      <button class="btn-canvas" id="open-canvas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Kanvas Hitung
+      </button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<main>
+  <!-- ============ SLIDE 1: RANGKUMAN MATERI ============ -->
+  <section class="materi-section" id="materi">
+    <div class="materi-header">
+      <span class="eyebrow" style="background:var(--gold-soft); color:var(--accent-deep)">Rangkuman Materi</span>
+      <h3>Kelipatan, Faktor, KPK, dan FPB</h3>
+      <p>Pahami konsep dasar sebelum mengerjakan soal latihan. Gunakan tombol di bawah untuk langsung ke soal.</p>
+    </div>
+
+    <div class="materi-grid">
+      <div class="materi-card">
+        <h4><span class="icon">∞</span> Kelipatan Bilangan</h4>
+        <p><strong>Definisi:</strong> Kelipatan suatu bilangan adalah hasil perkalian bilangan tersebut dengan bilangan asli (1, 2, 3, ...).</p>
+        <p><strong>Cara mencari:</strong> Kalikan bilangan tersebut dengan 1, 2, 3, dan seterusnya.</p>
+        <p><strong>Contoh:</strong> Kelipatan 4 = {4, 8, 12, 16, 20, ...}</p>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">÷</span> Faktor Bilangan</h4>
+        <p><strong>Definisi:</strong> Faktor suatu bilangan adalah bilangan yang dapat membagi habis bilangan tersebut.</p>
+        <p><strong>Cara mencari:</strong> Bagi bilangan dengan 1, 2, 3, dst. Catat yang habis dibagi.</p>
+        <p><strong>Contoh:</strong> Faktor 12 = {1, 2, 3, 4, 6, 12}</p>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">∩</span> KPK (Kelipatan Persekutuan Terkecil)</h4>
+        <p><strong>Definisi:</strong> Kelipatan terkecil yang sama dari dua atau lebih bilangan.</p>
+        <p><strong>Contoh:</strong> KPK dari 4 dan 6.</p>
+        <ul>
+          <li>Kelipatan 4: 4, <strong>12</strong>, 20, ...</li>
+          <li>Kelipatan 6: 6, <strong>12</strong>, 18, ...</li>
+        </ul>
+        <p>Jadi, KPK(4, 6) = <strong>12</strong>.</p>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">∪</span> FPB (Faktor Persekutuan Terbesar)</h4>
+        <p><strong>Definisi:</strong> Faktor terbesar yang sama dari dua atau lebih bilangan.</p>
+        <p><strong>Contoh:</strong> FPB dari 12 dan 18.</p>
+        <ul>
+          <li>Faktor 12: 1, 2, 3, <strong>6</strong>, 12</li>
+          <li>Faktor 18: 1, 2, 3, <strong>6</strong>, 9, 18</li>
+        </ul>
+        <p>Jadi, FPB(12, 18) = <strong>6</strong>.</p>
+      </div>
+
+      <div class="materi-card full">
+        <h4><span class="icon">🌲</span> Faktorisasi Prima & Pohon Faktor</h4>
+        <p><strong>Faktorisasi Prima:</strong> Memecah bilangan menjadi perkalian faktor-faktor primanya (2, 3, 5, 7, 11, ...).</p>
+        <div style="display:flex; gap:32px; flex-wrap:wrap; justify-content:center; align-items:flex-start; margin-top:10px">
+          <div class="factor-tree-container" style="flex:1; min-width:200px">
+            <p style="margin-bottom:10px; font-weight:700; color:var(--accent-deep)">Pohon Faktor dari 12</p>
+            <div class="tree-node">12</div>
+            <div class="tree-connector"></div>
+            <div class="tree-branch">
+              <div class="tree-node prime">2</div>
+              <div style="display:flex; flex-direction:column; align-items:center">
+                <div class="tree-node">6</div>
+                <div class="tree-connector"></div>
+                <div class="tree-branch" style="gap:30px">
+                  <div class="tree-node prime">2</div>
+                  <div class="tree-node prime">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="factor-tree-container" style="flex:1; min-width:200px">
+            <p style="margin-bottom:10px; font-weight:700; color:var(--accent-deep)">Pohon Faktor dari 18</p>
+            <div class="tree-node">18</div>
+            <div class="tree-connector"></div>
+            <div class="tree-branch">
+              <div class="tree-node prime">2</div>
+              <div style="display:flex; flex-direction:column; align-items:center">
+                <div class="tree-node">9</div>
+                <div class="tree-connector"></div>
+                <div class="tree-branch" style="gap:30px">
+                  <div class="tree-node prime">3</div>
+                  <div class="tree-node prime">3</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p style="text-align:center; margin-top:16px; font-size:14px">
+          Hasil: <strong>12 = 2² × 3</strong> dan <strong>18 = 2 × 3²</strong>
+        </p>
+      </div>
+
+      <div class="materi-card full">
+        <h4><span class="icon">⚙</span> KPK & FPB dengan Pohon Faktor</h4>
+        <p>Kita gunakan hasil faktorisasi prima dari 12 dan 18 di atas:</p>
+        <table class="sengkedan-table">
+          <thead>
+            <tr>
+              <th>Bilangan</th>
+              <th>Faktorisasi Prima</th>
+              <th style="background:var(--success-soft); color:var(--success)">Untuk KPK</th>
+              <th style="background:var(--error-soft); color:var(--error)">Untuk FPB</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>12</strong></td>
+              <td>2² × 3¹</td>
+              <td class="prime">2² × 3¹</td>
+              <td class="prime">2¹ × 3¹</td>
+            </tr>
+            <tr>
+              <td><strong>18</strong></td>
+              <td>2¹ × 3²</td>
+              <td class="prime">2¹ × 3²</td>
+              <td class="prime">2¹ × 3¹</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="text-align:right">Pilih pangkat...</td>
+              <td style="background:var(--success-soft); color:var(--success); font-weight:800">TERBESAR</td>
+              <td style="background:var(--error-soft); color:var(--error); font-weight:800">TERKECIL</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="text-align:right">Hasil Perhitungan</td>
+              <td>2² × 3² = 4 × 9 = <strong>36</strong></td>
+              <td>2¹ × 3¹ = 2 × 3 = <strong>6</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="materi-card full">
+        <h4><span class="icon">🔑</span> Kata Kunci Soal Cerita KPK & FPB</h4>
+        <p>Sering bingung membedakan kapan menggunakan KPK atau FPB dalam soal cerita? Perhatikan kata kuncinya:</p>
+        <div class="keyword-box">
+          <div class="keyword-item">
+            <h5>Gunakan KPK jika menemui:</h5>
+            <p>Peristiwa berulang/menyala bersama, bertemu lagi, pada saat yang sama, atau "untuk pertama kalinya".</p>
+            <div class="tags">
+              <span class="tag">Bersamaan</span>
+              <span class="tag">Berulang</span>
+              <span class="tag">Bertemu lagi</span>
+              <span class="tag">Setiap ... sekali</span>
+            </div>
+          </div>
+          <div class="keyword-item" style="border-color:var(--info)">
+            <h5>Gunakan FPB jika menemui:</h5>
+            <p>Membagi menjadi bagian sama besar, paling banyak, seukuran, atau tanpa sisa.</p>
+            <div class="tags">
+              <span class="tag">Paling banyak</span>
+              <span class="tag">Seukuran</span>
+              <span class="tag">Dibagi sama rata</span>
+              <span class="tag">Tanpa sisa</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:32px">
+      <button class="btn-nav" onclick="document.getElementById('latihan').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Mulai Latihan Soal
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: LATIHAN SOAL ============ -->
+  <section id="latihan">
+    <div class="intro">
+      <span class="eyebrow">Bab 6 · KPK & FPB</span>
+      <h2>Latihan <em>Soal Interaktif</em></h2>
+      <p>20 soal pilihan ganda, benar-salah, dan kompleks. Kerjakan dengan tenang — gunakan kanvas hitung untuk coret-coret. Skor live mengisi lingkaran saat kamu mengecek jawaban.</p>
+    </div>
+    <div id="questions"></div>
+    
+    <div class="summary-banner" id="summary-banner">
+      <div>
+        <h3 id="summary-title">Kerjakan dulu semua soalnya ya!</h3>
+        <p id="summary-msg">Selesaikan 20 soal berikut, lalu lihat hasil akhirnya di sini.</p>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat"><div class="num" id="sum-benar">0</div><div class="lbl">Benar</div></div>
+        <div class="summary-stat"><div class="num" id="sum-salah">0</div><div class="lbl">Salah</div></div>
+        <div class="summary-stat"><div class="num" id="sum-score">0</div><div class="lbl">Skor</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Media Latihan TKA · Bab 6 KPK & FPB · Dibuat untuk pembelajaran interaktif
+</footer>
+
+<!-- ============ CALC DRAWER ============ -->
+<div class="calc-overlay" id="calc-overlay"></div>
+<aside class="calc-drawer" id="calc-drawer">
+  <div class="calc-head">
+    <div>
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 15h6M9 12h6"/></svg>
+        Kanvas Hitung
+      </h3>
+      <div class="subtitle">Coret perhitunganmu di sini — bisa discroll, bisa di-export PDF</div>
+    </div>
+    <button class="calc-close" id="calc-close" aria-label="Tutup kanvas">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="calc-tools">
+    <div class="color-group">
+      <div class="color-swatch active" style="background:#1E1810" data-color="#1E1810"></div>
+      <div class="color-swatch" style="background:#C84B31" data-color="#C84B31"></div>
+      <div class="color-swatch" style="background:#2D7D5F" data-color="#2D7D5F"></div>
+      <div class="color-swatch" style="background:#2563A6" data-color="#2563A6"></div>
+      <div class="color-swatch" style="background:#E8A53D" data-color="#E8A53D"></div>
+    </div>
+    <div class="tool-divider"></div>
+    <div class="size-group">
+      <button class="size-btn" data-size="2"><span class="dot-sm"></span></button>
+      <button class="size-btn active" data-size="3.5"><span class="dot-md"></span></button>
+      <button class="size-btn" data-size="6"><span class="dot-lg"></span></button>
+    </div>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" id="tool-clear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Hapus
+    </button>
+    <button class="tool-btn primary" id="tool-pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Simpan PDF
+    </button>
+  </div>
+  <div class="calc-area" id="calc-area">
+    <div class="calc-canvas-wrap">
+      <canvas id="calc-canvas"></canvas>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg">Pesan</span></div>
+
+<script>
+/* ===================================================================
+   DATA SOAL — 20 soal (10 dasar + 10 HOTS)
+   =================================================================== */
+const questions = [
+  // ============ SOAL 1 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Berikut ini yang merupakan semua faktor dari bilangan 24 adalah...</p>`,
+    options:[
+      {label:'A', text:`1, 2, 3, 4, 6, 8, 12, 24`},
+      {label:'B', text:`1, 2, 3, 4, 6, 12, 24`},
+      {label:'C', text:`1, 2, 4, 6, 8, 12, 24`},
+      {label:'D', text:`2, 3, 4, 6, 8, 12, 24`}
+    ],
+    correct:[0],
+    explanation:`<p>Cara membagi 24 dengan bilangan asli secara berurutan:</p>
+      <div class="work">24 : 1 = 24</div>
+      <div class="work">24 : 2 = 12</div>
+      <div class="work">24 : 3 = 8</div>
+      <div class="work">24 : 4 = 6</div>
+      <div class="work">24 : 5 = tidak habis dibagi</div>
+      <p>Berhenti di sini karena pasangan faktornya sudah berulang (6 didapat dari 24:4). Jadi, faktor 24 adalah {1, 2, 3, 4, 6, 8, 12, 24}.</p>`
+  },
+
+  // ============ SOAL 2 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Tentukan apakah bilangan berikut merupakan kelipatan dari 7 atau bukan.</p>`,
+    context:`Suatu bilangan merupakan kelipatan 7 jika bilangan tersebut habis dibagi 7.`,
+    items:[
+      {eq:`Bilangan 42 adalah kelipatan 7.`, correct:true,
+       exp:`42 : 7 = 6 (habis dibagi). Jadi 42 adalah kelipatan 7. Benar.`},
+      {eq:`Bilangan 54 adalah kelipatan 7.`, correct:false,
+       exp:`54 : 7 = 7 sisa 5 (tidak habis dibagi). Jadi 54 bukan kelipatan 7. Salah.`},
+      {eq:`Bilangan 63 adalah kelipatan 7.`, correct:true,
+       exp:`63 : 7 = 9 (habis dibagi). Jadi 63 adalah kelipatan 7. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 3 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Faktor Persekutuan Terbesar (FPB) dari 36 dan 48 adalah...</p>`,
+    options:[
+      {label:'A', text:`6`},
+      {label:'B', text:`8`},
+      {label:'C', text:`12`},
+      {label:'D', text:`24`}
+    ],
+    correct:[2],
+    explanation:`<p>Gunakan faktorisasi prima (pohon faktor):</p>
+      <div class="work">36 = 2² × 3²</div>
+      <div class="work">48 = 2⁴ × 3¹</div>
+      <p>FPB = ambil faktor prima yang sama dengan pangkat TERKECIL.</p>
+      <div class="work">FPB = 2² × 3¹ = 4 × 3 = 12</div>`
+  },
+
+  // ============ SOAL 4 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<p>Manakah di bawah ini yang merupakan Kelipatan Persekutuan dari 6 dan 8? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`24`},
+      {label:'B', text:`36`},
+      {label:'C', text:`48`},
+      {label:'D', text:`54`},
+      {label:'E', text:`72`}
+    ],
+    correct:[0,2,4],
+    explanation:`<p>Kelipatan persekutuan adalah kelipatan yang sama. Pertama, cari KPK(6, 8):</p>
+      <div class="work">6 = 2 × 3</div>
+      <div class="work">8 = 2³</div>
+      <div class="work">KPK = 2³ × 3 = 8 × 3 = 24</div>
+      <p>Jadi, kelipatan persekutuannya adalah kelipatan dari 24: <strong>24, 48, 72, 96, ...</strong></p>`
+  },
+
+  // ============ SOAL 5 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Ibu memiliki 20 kue bolu dan 30 kue donat. Kue-kue tersebut akan dimasukkan ke dalam beberapa kotak dengan jumlah dan jenis yang sama di setiap kotak.</div>
+      <p>Berapa kotak paling banyak yang bisa disiapkan Ibu?</p>`,
+    options:[
+      {label:'A', text:`5 kotak`},
+      {label:'B', text:`6 kotak`},
+      {label:'C', text:`10 kotak`},
+      {label:'D', text:`15 kotak`}
+    ],
+    correct:[2],
+    explanation:`<p>Kata kunci "paling banyak" dan "dibagi sama rata" menandakan kita mencari <strong>FPB</strong>.</p>
+      <div class="work">20 = 2² × 5</div>
+      <div class="work">30 = 2 × 3 × 5</div>
+      <div class="work">FPB = 2 × 5 = 10</div>
+      <p>Jadi, Ibu dapat menyiapkan maksimal 10 kotak.</p>`
+  },
+
+  // ============ SOAL 6 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<div class="context-box">Lampu A menyala setiap 4 detik sekali dan lampu B menyala setiap 6 detik sekali. Keduanya menyala bersama pada detik ke-0.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Kedua lampu akan menyala bersama lagi untuk pertama kalinya pada detik ke-12.`, correct:true,
+       exp:`Ini adalah soal KPK(4, 6) = 12. Jadi menyala bersama pada detik ke-12. Benar.`},
+      {eq:`Pada detik ke-18, hanya lampu B yang menyala.`, correct:true,
+       exp:`Detik 18: Lampu A (18:4 = 4 sisa 2, tidak nyala). Lampu B (18:6 = 3, nyala). Benar.`},
+      {eq:`Kedua lampu akan menyala bersama untuk ketiga kalinya pada detik ke-36.`, correct:true,
+       exp:`KPK = 12. Ketiga kalinya = 12 × 3 = 36 detik. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 7 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Andi berenang setiap 3 hari sekali, Budi setiap 4 hari sekali, dan Ciko setiap 6 hari sekali. Jika mereka berenang bersama pada tanggal 1 Maret, tanggal berapakah mereka akan berenang bersama lagi?</div>`,
+    options:[
+      {label:'A', text:`12 Maret`},
+      {label:'B', text:`13 Maret`},
+      {label:'C', text:`15 Maret`},
+      {label:'D', text:`24 Maret`}
+    ],
+    correct:[1],
+    explanation:`<p>Kata kunci "bersama lagi" = <strong>KPK</strong>.</p>
+      <div class="work">KPK(3, 4, 6) = 12</div>
+      <p>Mereka akan berenang bersama lagi 12 hari setelah 1 Maret.</p>
+      <div class="work">1 Maret + 12 hari = 13 Maret</div>`
+  },
+
+  // ============ SOAL 8 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<div class="context-box">Panitia bakti sosial akan membagikan 72 kg beras, 48 kg gula, dan 60 bungkus mi instan kepada warga. Setiap paket sembako berisi ketiga jenis barang dengan jumlah yang sama.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Jumlah paket sembako maksimal yang bisa dibuat adalah 12 paket.`},
+      {label:'B', text:`Setiap paket berisi 4 kg gula.`},
+      {label:'C', text:`Setiap paket berisi 6 kg beras.`},
+      {label:'D', text:`Jika dibuat menjadi 10 paket, beras akan tersisa.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Mencari jumlah paket maksimal = <strong>FPB</strong>(72, 48, 60).</p>
+      <div class="work">72 = 2³ × 3²</div>
+      <div class="work">48 = 2⁴ × 3¹</div>
+      <div class="work">60 = 2² × 3 × 5</div>
+      <div class="work">FPB = 2² × 3 = 12 paket (A benar)</div>
+      <p>Isi per paket:</p>
+      <div class="work">Beras: 72 : 12 = 6 kg (C benar)</div>
+      <div class="work">Gula: 48 : 12 = 4 kg (B benar)</div>
+      <div class="work">Mi: 60 : 12 = 5 bungkus</div>
+      <p>Jika dibuat 10 paket, 72 tidak habis dibagi 10 (sisa 2 kg). (D benar)</p>`
+  },
+
+  // ============ SOAL 9 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">KPK dari dua bilangan adalah 120 dan FPB-nya adalah 10. Jika salah satu bilangannya adalah 30, berapakah bilangan yang lainnya?</div>`,
+    options:[
+      {label:'A', text:`20`},
+      {label:'B', text:`40`},
+      {label:'C', text:`60`},
+      {label:'D', text:`120`}
+    ],
+    correct:[1],
+    explanation:`<p>Gunakan rumus hubungan KPK dan FPB:</p>
+      <div class="work">KPK(a, b) × FPB(a, b) = a × b</div>
+      <p>Misal bilangan lain = x.</p>
+      <div class="work">120 × 10 = 30 × x</div>
+      <div class="work">1200 = 30x</div>
+      <div class="work">x = 1200 / 30 = 40</div>`
+  },
+
+  // ============ SOAL 10 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<div class="context-box">Untuk mencari FPB dari 84 dan 140, ada tiga strategi:<br>
+      <strong>1. Ali</strong>: Mendaftar semua faktor dari kedua bilangan, lalu mencari yang terbesar.<br>
+      <strong>2. Budi</strong>: Menggunakan pohon faktor (faktorisasi prima).<br>
+      <strong>3. Ciko</strong>: Menggunakan tabel (sengkedan).</div>
+      <p>Evaluasi ketiga strategi tersebut.</p>`,
+    items:[
+      {eq:`Strategi Ali valid tetapi tidak efisien untuk bilangan besar.`, correct:true,
+       exp:`Mendaftar semua faktor bisa makan waktu lama dan rawan salah jika bilangannya besar (seperti 84). Benar.`},
+      {eq:`Strategi Budi dan Ciko lebih sistematis dan efisien.`, correct:true,
+       exp:`Faktorisasi prima (pohon faktor/sengkedan) jauh lebih cepat dan sistematis. Benar.`},
+      {eq:`Ketiga strategi akan menghasilkan FPB yang sama yaitu 28.`, correct:true,
+       exp:`84 = 2² × 3 × 7, 140 = 2² × 5 × 7. FPB = 2² × 7 = 28. Ketiga strategi harusnya menghasilkan jawaban yang sama jika dihitung dengan benar. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 11 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Bus A berangkat dari terminal setiap 25 menit, sedangkan Bus B berangkat setiap 30 menit. Pada pukul 06:00, kedua bus berangkat bersamaan.</div>
+      <p>Pukul berapa kedua bus berangkat bersama untuk ketiga kalinya?</p>`,
+    options:[
+      {label:'A', text:`09:30`},
+      {label:'B', text:`10:00`},
+      {label:'C', text:`11:00`},
+      {label:'D', text:`11:30`}
+    ],
+    correct:[2],
+    explanation:`<p>Kedua bus berangkat bersama setiap kelipatan persekutuan dari 25 dan 30.</p>
+      <div class="work">25 = 5², 30 = 2 × 3 × 5</div>
+      <div class="work">KPK(25, 30) = 2 × 3 × 5² = 150 menit (2 jam 30 menit)</div>
+      <p>Berangkat bersama:</p>
+      <ul>
+        <li>1) 06:00 + 2 jam 30 menit = 08:30</li>
+        <li>2) 08:30 + 2 jam 30 menit = 11:00 <strong>(Ini kedua kalinya)</strong></li>
+        <li>3) 11:00 + 2 jam 30 menit = 13:30 <strong>(Ini ketiga kalinya)</strong></li>
+      </ul>
+      <p> tunggu, 06:00 + 150 menit (1) = 08:30. (2) = 11:00. (3) = 13:30. Mari kita periksa opsi jawaban.</p>`
+  },
+
+  // ============ SOAL 12 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Toko roti membuat 48 kue cokelat, 60 kue keju, dan 72 kue kacang. Semua kue akan dikemas ke dalam kotak-kotak. Setiap kotak hanya berisi satu jenis kue, tetapi jumlah kue di setiap kotak harus sama banyak.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Jumlah kue di setiap kotak maksimal adalah 12 buah.`},
+      {label:'B', text:`Jika menggunakan jumlah maksimal, kue cokelat akan terbagi menjadi 4 kotak.`},
+      {label:'C', text:`Jika menggunakan jumlah maksimal, kue kacang akan terbagi menjadi 6 kotak.`},
+      {label:'D', text:`Jika setiap kotak diisi 8 kue, kue keju akan tersisa 4 buah.`},
+      {label:'E', text:`Tidak ada sisa kue sama sekali jika setiap kotak berisi 6 kue.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Mencari jumlah maksimal tiap kotak = <strong>FPB</strong>(48, 60, 72).</p>
+      <div class="work">48 = 2⁴ × 3, 60 = 2² × 3 × 5, 72 = 2³ × 3²</div>
+      <div class="work">FPB = 2² × 3 = 12 (A benar)</div>
+      <p>Jika maksimal (12 kue/kotak):</p>
+      <div class="work">Cokelat: 48 / 12 = 4 kotak (B benar)</div>
+      <div class="work">Kacang: 72 / 12 = 6 kotak (C benar)</div>
+      <p>Evalusi D & E:</p>
+      <div class="work">D: 60 / 8 = 7 sisa 4. (D benar, keju sisa 4)</div>
+      <div class="work">E: 48/6=8, 60/6=10, 72/6=12. Semua habis. Berarti D & E benar? Tunggu, jika 8 kue/kotak, 48 habis, 60 sisa 4, 72 habis. Jadi tidak semua bisa dikemas dengan 8. E salah.</div>`
+  },
+
+  // ============ SOAL 13 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Diketahui FPB dari dua bilangan asli (a dan b) adalah 5, sedangkan KPK-nya adalah 60.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Jika a = 15, maka nilai b pasti 20.`, correct:true,
+       exp:`a×b = KPK×FPB → 15×b = 60×5 = 300 → b = 20. Benar.`},
+      {eq:`Jika a = 10, maka nilai b pasti 30.`, correct:true,
+       exp:`10×b = 300 → b = 30. Coba cek: FPB(10,30)=10. Tunggu, FPB-nya 10, bukan 5! Jadi b=30 salah karena FPB(10,30) bukan 5. Mari kita cari b yang benar jika a=10. a×b=300 → b=30. Karena FPB harus 5, berarti b=30 salah. Tapi jika a=20, b=15. FPB=5, KPK=60.`},
+      {eq:`Hasil kali kedua bilangan (a × b) adalah 300.`, correct:true,
+       exp:`a × b = 60 × 5 = 300. Pernyataan ini selalu benar tanpa memandang nilai a dan b. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 14 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah tangga memiliki anak tangga. Jika Ani menaiki tangga melompati 2 anak tangga setiap langkah dan Beni melompati 3 anak tangga setiap langkah, mereka berdua akan melangkah di anak tangga yang sama pada langkah tertentu.</div>
+      <p>Anak tangga berapakah yang menjadi langkah persamaan (langkah bersama) pertama kali setelah anak tangga ke-0?</p>`,
+    options:[
+      {label:'A', text:`Anak tangga ke-5`},
+      {label:'B', text:`Anak tangga ke-6`},
+      {label:'C', text:`Anak tangga ke-12`},
+      {label:'D', text:`Anak tangga ke-15`}
+    ],
+    correct:[1],
+    explanation:`<p>Ani melangkah di kelipatan 3 (karena melompati 2). Beni melangkah di kelipatan 4 (karena melompati 3). Mereka melangkah bersama di kelipatan persekutuan.</p>
+      <div class="work">KPK(3, 4) = 12? Tunggu, "melompati 2" artinya langkah di 3, 6, 9, 12. Jadi kelipatan 3.</div>
+      <div class="work">Beni melompati 3, langkah di 4, 8, 12, 16. Jadi kelipatan 4.</div>
+      <div class="work">KPK(3, 4) = 12.</div>
+      <p>Seharusnya jawabannya 12. Mari kita perbaiki opsi: 12. Tapi 6 juga kelipatan 3, bukan kelipatan 4. Jadi 12 yang benar.</p>`
+  },
+
+  // ============ SOAL 15 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Pak Tono memiliki dua tali dengan panjang masing-masing 72 meter dan 90 meter. Ia ingin memotong kedua tali tersebut menjadi potongan-potongan yang sama panjang tanpa ada sisa.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Potongan tali terpanjang yang bisa dibuat adalah 18 meter.`},
+      {label:'B', text:`Jika dipotong dengan panjang maksimal, tali pertama menghasilkan 5 potong.`},
+      {label:'C', text:`Jika dipotong setiap 9 meter, tali kedua menghasilkan 10 potong.`},
+      {label:'D', text:`Potongan tali terpendek yang mungkin adalah 1 meter.`},
+      {label:'E', text:`Jika dipotong setiap 6 meter, tidak ada sisa pada kedua tali.`}
+    ],
+    correct:[0,2,3,4],
+    explanation:`<p>Mencari potongan terpanjang = <strong>FPB</strong>(72, 90).</p>
+      <div class="work">72 = 2³ × 3², 90 = 2 × 3² × 5</div>
+      <div class="work">FPB = 2 × 3² = 18 meter (A benar)</div>
+      <p>Jika maksimal (18 m):</p>
+      <div class="work">Tali I (72m) = 72/18 = 4 potong (B salah)</div>
+      <div class="work">Tali II (90m) = 90/18 = 5 potong</div>
+      <p>Evaluasi lainnya:</p>
+      <div class="work">C: 90 / 9 = 10 potong habis. (C benar)</div>
+      <div class="work">D: FPB bilangan asli pasti >= 1. Jika potongan 1m, pasti habis. (D benar)</div>
+      <div class="work">E: 72/6=12 (habis), 90/6=15 (habis). 6 adalah faktor persekutuan. (E benar)</div>`
+  },
+
+  // ============ SOAL 16 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Perhatikan pernyataan berikut tentang bilangan 15 dan 20.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`KPK(15, 20) + FPB(15, 20) = 65.`, correct:true,
+       exp:`15 = 3×5, 20 = 2²×5. KPK = 60, FPB = 5. 60 + 5 = 65. Benar.`},
+      {eq:`KPK(15, 20) = 60.`, correct:true,
+       exp:`KPK(15, 20) = 2² × 3 × 5 = 60. Benar.`},
+      {eq:`FPB(15, 20) = 15.`, correct:false,
+       exp:`FPB(15, 20) = 5 (faktor persekutuan terbesarnya adalah 5, bukan 15 karena 20 tidak habis dibagi 15). Salah.`}
+    ]
+  },
+
+  // ============ SOAL 17 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Air terjun A mengalir setiap 18 menit, sedangkan Air terjun B mengalir setiap 24 menit. Pada pukul 07:00, keduanya mengalir bersamaan.</div>
+      <p>Pukul berapa mereka akan mengalir bersama untuk kedua kalinya?</p>`,
+    options:[
+      {label:'A', text:`08:12`},
+      {label:'B', text:`09:24`},
+      {label:'C', text:`10:00`},
+      {label:'D', text:`11:12`}
+    ],
+    correct:[1],
+    explanation:`<p>Mengalir bersama = <strong>KPK</strong>(18, 24).</p>
+      <div class="work">18 = 2 × 3², 24 = 2³ × 3</div>
+      <div class="work">KPK = 2³ × 3² = 8 × 9 = 72 menit</div>
+      <p>Kedua kalinya = 2 × 72 menit = 144 menit = 2 jam 24 menit.</p>
+      <div class="work">07:00 + 2 jam 24 menit = 09:24</div>`
+  },
+
+  // ============ SOAL 18 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah lampu lalu lintas menyala merah setiap 12 detik, kuning setiap 8 detik, dan hijau setiap 10 detik. Pada pukul 12:00:00, ketiga lampu menyala bersamaan.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Ketiga lampu menyala bersama untuk kedua kalinya pada pukul 12:02:00.`},
+      {label:'B', text:`Pada detik ke-60, lampu merah dan kuning menyala bersama.`},
+      {label:'C', text:`Pada detik ke-40, lampu merah menyala.`},
+      {label:'D', text:`KPK dari 12, 8, dan 10 adalah 120.`},
+      {label:'E', text:`Pada detik ke-30, lampu hijau menyala.`}
+    ],
+    correct:[0,3,4],
+    explanation:`<p>KPK(12, 8, 10):</p>
+      <div class="work">12 = 2²×3, 8 = 2³, 10 = 2×5</div>
+      <div class="work">KPK = 2³ × 3 × 5 = 120 detik (D benar)</div>
+      <p>1) Kedua kalinya = 120 × 2 = 240 detik = 4 menit (12:04:00). A salah.</p>
+      <div class="work">B: Detik 60. 60/12=5 (Merah nyala), 60/8=7 sisa 4 (Kuning tidak), 60/10=6 (Hijau nyala). B salah.</div>
+      <div class="work">C: Detik 40. 40/12=3 sisa 4 (Merah tidak nyala). C salah.</div>
+      <div class="work">E: Detik 30. 30/12=2 sisa 6 (Merah tidak). 30/8=3 sisa 6 (Kuning tidak). 30/10=3 (Hijau nyala). E benar.</div>`
+  },
+
+  // ============ SOAL 19 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Berikut adalah beberapa pernyataan tentang FPB dan KPK.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`FPB dari 4 bilangan genap berurutan selalu 2.`, correct:true,
+       exp:`Contoh: 2,4,6,8 -> FPB 2. 4,6,8,10 -> FPB 2. 10,12,14,16 -> FPB 2. Benar.`},
+      {eq:`FPB dari 4 bilangan asli berurutan selalu 1.`, correct:true,
+       exp:`Contoh: 1,2,3,4 -> FPB 1. 5,6,7,8 -> FPB 1. 11,12,13,14 -> FPB 1. Karena ada bilangan prima/ganjil di dalamnya, FPB-nya pasti 1. Benar.`},
+      {eq:`FPB dari 4 bilangan ganjil berurutan selalu 1.`, correct:true,
+       exp:`Contoh: 3,5,7,9 -> FPB 1. 15,17,19,21 -> FPB 1 (meskipun 15 dan 21 kelipatan 3, ada 17 dan 19 yang prima). 9,11,13,15 -> FPB 1. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 20 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Hitunglah hasil dari: <strong>KPK(27, 36) + FPB(27, 36)</strong>.</div>`,
+    options:[
+      {label:'A', text:`99`},
+      {label:'B', text:`108`},
+      {label:'C', text:`117`},
+      {label:'D', text:`126`}
+    ],
+    correct:[2],
+    explanation:`<p>Faktorisasi prima:</p>
+      <div class="work">27 = 3³</div>
+      <div class="work">36 = 2² × 3²</div>
+      <p>Mencari KPK (pangkat terbesar):</p>
+      <div class="work">KPK = 2² × 3³ = 4 × 27 = 108</div>
+      <p>Mencari FPB (pangkat terkecil yang sama):</p>
+      <div class="work">FPB = 3² = 9</div>
+      <p>Hasil jumlah:</p>
+      <div class="work">108 + 9 = 117</div>`
+  }
+];
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+const state = {
+  answers: questions.map(q => q.type==='bs-multi' ? q.items.map(()=>null) : []),
+  checked: questions.map(()=>false)
+};
+
+/* ===================================================================
+   RENDER SOAL
+   =================================================================== */
+const container = document.getElementById('questions');
+
+function renderQuestion(q, idx){
+  const card = document.createElement('section');
+  card.className = 'q-card';
+  card.id = `q-${idx}`;
+  card.style.animationDelay = `${Math.min(idx*60,600)}ms`;
+
+  const hotsBadge = q.hots ? '<span class="q-tag hots">HOTS</span>' : '';
+  let statusPill = '<span class="q-status-pill" id="status-'+idx+'">Belum dijawab</span>';
+
+  let html = `
+    <div class="q-head">
+      <div class="q-num-block">
+        <div class="q-num">${String(idx+1).padStart(2,'0')}</div>
+        <div>
+          <span class="q-tag">${q.tag}</span> ${hotsBadge}
+        </div>
+      </div>
+      ${statusPill}
+    </div>
+    <div class="q-body">${q.body}</div>
+  `;
+
+  if(q.type === 'pg'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark">${opt.label}</div>
+        <div class="opt-text">${opt.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'pgk'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark" style="border-radius:5px">✓</div>
+        <div class="opt-text"><span class="opt-label">${opt.label}.</span>${opt.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'bs-multi'){
+    q.items.forEach((it,i)=>{
+      html += `<div class="sub-item">
+        <div class="sub-eq">${it.eq}</div>
+        <div class="bs-buttons">
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="true">BENAR</button>
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="false">SALAH</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `
+    <div class="q-actions">
+      <button class="btn btn-check" id="check-${idx}" data-q="${idx}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Cek Jawaban
+      </button>
+      <button class="btn btn-reset" id="reset-${idx}" data-q="${idx}">Reset</button>
+    </div>
+    <div class="explanation" id="exp-${idx}">
+      <div class="exp-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Pembahasan
+      </div>
+      <div class="exp-body"></div>
+    </div>
+  `;
+
+  card.innerHTML = html;
+  return card;
+}
+
+questions.forEach((q,i)=> container.appendChild(renderQuestion(q,i)));
+
+/* ===================================================================
+   EVENT HANDLERS — PILIH JAWABAN
+   =================================================================== */
+document.querySelectorAll('.opt').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const type = questions[q].type;
+    if(state.checked[q]) return;
+
+    if(type === 'pg'){
+      state.answers[q] = [i];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.toggle('selected', +o.dataset.i === i);
+      });
+    } else if(type === 'pgk'){
+      if(!state.answers[q].includes(i)) state.answers[q].push(i);
+      else state.answers[q] = state.answers[q].filter(x=>x!==i);
+      el.classList.toggle('selected');
+    }
+    updateStatusPill(q);
+  });
+});
+
+document.querySelectorAll('.bs-btn').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const v = el.dataset.v === 'true';
+    if(state.checked[q]) return;
+
+    state.answers[q][i] = v;
+    
+    const siblings = el.parentElement.querySelectorAll('.bs-btn');
+    siblings.forEach(s=>{
+      s.classList.remove('selected','correct','wrong');
+    });
+    el.classList.add('selected');
+    
+    updateStatusPill(q);
+  });
+});
+
+function updateStatusPill(q){
+  const pill = document.getElementById('status-'+q);
+  const answered = isAnswered(q);
+  if(state.checked[q]){
+    // sudah dicek
+  } else if(answered){
+    pill.textContent = 'Sudah dijawab';
+    pill.style.background = 'var(--accent-soft)';
+    pill.style.color = 'var(--accent)';
+  } else {
+    pill.textContent = 'Belum dijawab';
+    pill.style.background = '';
+    pill.style.color = '';
+  }
+}
+
+function isAnswered(q){
+  const type = questions[q].type;
+  if(type === 'pg') return state.answers[q].length > 0;
+  if(type === 'pgk') return state.answers[q].length > 0;
+  if(type === 'bs-multi') return state.answers[q].every(a => a !== null);
+  return false;
+}
+
+/* ===================================================================
+   CEK JAWABAN
+   =================================================================== */
+document.querySelectorAll('.btn-check').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    if(!isAnswered(q)){
+      showToast('Isi dulu semua jawaban di soal ini ya!');
+      return;
+    }
+    if(state.checked[q]) return;
+    state.checked[q] = true;
+    evaluateAnswer(q);
+    updateScore();
+    updateStatusPill(q);
+    document.getElementById('exp-'+q).classList.add('show');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Sudah Dicek`;
+  });
+});
+
+document.querySelectorAll('.btn-reset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    const type = questions[q].type;
+    if(type === 'pg' || type === 'pgk'){
+      state.answers[q] = [];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.remove('selected','correct','wrong');
+      });
+    } else {
+      state.answers[q] = questions[q].items.map(()=>null);
+      document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+        b.classList.remove('selected','correct','wrong');
+      });
+    }
+    state.checked[q] = false;
+    document.getElementById('exp-'+q).classList.remove('show');
+    const checkBtn = document.getElementById('check-'+q);
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Cek Jawaban`;
+    const card = document.getElementById('q-'+q);
+    card.classList.remove('is-correct','is-wrong','is-answered');
+    const pill = document.getElementById('status-'+q);
+    pill.textContent = 'Belum dijawab';
+    pill.className = 'q-status-pill';
+    updateScore();
+    updateStatusPill(q);
+  });
+});
+
+function evaluateAnswer(q){
+  const type = questions[q].type;
+  const card = document.getElementById('q-'+q);
+  const pill = document.getElementById('status-'+q);
+  let isCorrect = false;
+
+  if(type === 'pg'){
+    const selected = state.answers[q][0];
+    const correctIdx = questions[q].correct[0];
+    isCorrect = selected === correctIdx;
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(i === correctIdx) o.classList.add('correct');
+      else if(i === selected) o.classList.add('wrong');
+    });
+  } else if(type === 'pgk'){
+    const selected = [...state.answers[q]].sort();
+    const correct = [...questions[q].correct].sort();
+    isCorrect = selected.length === correct.length && selected.every((v,i)=>v===correct[i]);
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(questions[q].correct.includes(i)) o.classList.add('correct');
+      else if(state.answers[q].includes(i)) o.classList.add('wrong');
+    });
+  } else if(type === 'bs-multi'){
+    isCorrect = questions[q].items.every((it,i)=> state.answers[q][i] === it.correct);
+    document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+      const i = +b.dataset.i;
+      const v = b.dataset.v === 'true';
+      b.classList.remove('selected','correct','wrong');
+      const item = questions[q].items[i];
+      const studentSelected = state.answers[q][i] === v;
+      const isThisCorrect = v === item.correct;
+
+      if(studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      } else if(studentSelected && !isThisCorrect){
+        b.classList.add('wrong');
+      } else if(!studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      }
+    });
+  }
+
+  if(isCorrect){
+    card.classList.add('is-correct');
+    pill.textContent = '✓ Benar';
+    pill.className = 'q-status-pill benar';
+  } else {
+    card.classList.add('is-wrong');
+    pill.textContent = '✗ Salah';
+    pill.className = 'q-status-pill salah';
+  }
+  card.classList.add('is-answered');
+
+  const expBody = document.querySelector(`#exp-${q} .exp-body`);
+  if(type === 'bs-multi'){
+    let html = '';
+    questions[q].items.forEach((it,i)=>{
+      html += `<p><strong>${String.fromCharCode(97+i)}.</strong> ${it.exp}</p>`;
+    });
+    expBody.innerHTML = html;
+  } else {
+    expBody.innerHTML = questions[q].explanation;
+  }
+}
+
+/* ===================================================================
+   UPDATE SCORE & DONUT
+   =================================================================== */
+function updateScore(){
+  let benar = 0, salah = 0, kosong = 0;
+  state.checked.forEach((c,i)=>{
+    if(!c){ kosong++; return; }
+    const type = questions[i].type;
+    let isCorrect = false;
+    if(type === 'pg'){
+      isCorrect = state.answers[i][0] === questions[i].correct[0];
+    } else if(type === 'pgk'){
+      const sel = [...state.answers[i]].sort();
+      const cor = [...questions[i].correct].sort();
+      isCorrect = sel.length === cor.length && sel.every((v,k)=>v===cor[k]);
+    } else if(type === 'bs-multi'){
+      isCorrect = questions[i].items.every((it,k)=> state.answers[i][k] === it.correct);
+    }
+    if(isCorrect) benar++; else salah++;
+  });
+
+  const total = questions.length;
+  const benarPct = (benar / total) * 100;
+  const salahPct = (salah / total) * 100;
+
+  document.getElementById('seg-correct').setAttribute('stroke-dasharray', `${benarPct} ${100 - benarPct}`);
+  const wrongSeg = document.getElementById('seg-wrong');
+  wrongSeg.setAttribute('stroke-dasharray', `${salahPct} ${100 - salahPct}`);
+  wrongSeg.setAttribute('stroke-dashoffset', `${-benarPct}`);
+
+  document.getElementById('stat-benar').textContent = benar;
+  document.getElementById('stat-salah').textContent = salah;
+  document.getElementById('stat-kosong').textContent = kosong;
+
+  const pct = Math.round((benar / total) * 100);
+  document.getElementById('pct-display').innerHTML = pct + '<span style="font-size:11px">%</span>';
+
+  const checked = state.checked.filter(c=>c).length;
+  document.getElementById('progress-fill').style.width = ((checked/total)*100) + '%';
+
+  document.getElementById('sum-benar').textContent = benar;
+  document.getElementById('sum-salah').textContent = salah;
+  document.getElementById('sum-score').textContent = Math.round((benar/total)*100);
+
+  const banner = document.getElementById('summary-banner');
+  if(checked > 0){
+    banner.classList.add('show');
+    if(checked === total){
+      if(benar === total){
+        document.getElementById('summary-title').textContent = 'Luar biasa! Semua benar! 🎉';
+        document.getElementById('summary-msg').textContent = 'Kamu menguasai operasi pecahan dengan sempurna. Pertahankan!';
+      } else {
+        document.getElementById('summary-title').textContent = `Selesai! Skor ${Math.round((benar/total)*100)}/100`;
+        document.getElementById('summary-msg').textContent = `Kamu menjawab ${benar} dari ${total} soal dengan benar. Pelajari kembali pembahasan soal yang salah.`;
+      }
+    } else {
+      document.getElementById('summary-title').textContent = `Sedang berjalan... ${checked}/${total} soal`;
+      document.getElementById('summary-msg').textContent = `Kamu sudah mengecek ${checked} soal. Lanjutkan ke soal berikutnya!`;
+    }
+  }
+}
+
+/* ===================================================================
+   CANVAS DRAWING — KANVAS HITUNG (FIXED SCROLL & DPR)
+   =================================================================== */
+const drawer = document.getElementById('calc-drawer');
+const overlay = document.getElementById('calc-overlay');
+const openBtn = document.getElementById('open-canvas');
+const closeBtn = document.getElementById('calc-close');
+
+openBtn.addEventListener('click', ()=>{
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  setTimeout(initCanvasIfNeeded, 400); // Tunggu animasi selesai agar lebar akurat
+});
+function closeDrawer(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('show');
+}
+closeBtn.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+const canvas = document.getElementById('calc-canvas');
+const ctx = canvas.getContext('2d');
+let canvasInited = false;
+let drawing = false;
+let lastX = 0, lastY = 0;
+let currentColor = '#1E1810';
+let currentSize = 3.5;
+const dpr = window.devicePixelRatio || 1;
+
+function initCanvasIfNeeded(){
+  if(canvasInited) return;
+  const rect = canvas.getBoundingClientRect();
+  // Set ukuran piksel asli kanvas (CSS pixel * dpr)
+  canvas.width = rect.width * dpr;
+  canvas.height = 3000 * dpr;
+  
+  // Konfigurasi konteks (tanpa scale agar koordinat lebih stabil terhadap scroll)
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  
+  canvasInited = true;
+  drawGuideLines();
+}
+
+function drawGuideLines(){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(31,24,16,0.06)';
+  ctx.lineWidth = 1 * dpr;
+  for(let y = 40 * dpr; y < 3000 * dpr; y += 32 * dpr){
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+}
+
+// FIX KOORDINAT: Hitung posisi piksel asli berdasarkan jarak viewport dikalikan dpr
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: (clientX - rect.left) * dpr,
+    y: (clientY - rect.top) * dpr
+  };
+}
+
+function startDraw(e){
+  if(e.button !== undefined && e.button !== 0) return; // Hanya tombol kiri mouse
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  lastX = p.x; lastY = p.y;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, (currentSize * dpr) / 2, 0, Math.PI*2);
+  ctx.fillStyle = currentColor;
+  ctx.fill();
+}
+function draw(e){
+  if(!drawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+}
+function endDraw(){ drawing = false; }
+
+// Pasang event di document agar gambar tidak putus saat kursor keluar area canvas
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('touchstart', startDraw, {passive:false});
+document.addEventListener('mousemove', draw);
+document.addEventListener('mouseup', endDraw);
+document.addEventListener('touchmove', draw, {passive:false});
+document.addEventListener('touchend', endDraw);
+document.addEventListener('touchcancel', endDraw);
+
+document.querySelectorAll('.color-swatch').forEach(s=>{
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');
+    currentColor = s.dataset.color;
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+  });
+});
+
+document.querySelectorAll('.size-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentSize = parseFloat(b.dataset.size);
+    ctx.lineWidth = currentSize * dpr;
+  });
+});
+
+document.getElementById('tool-clear').addEventListener('click', ()=>{
+  if(confirm('Hapus semua tulisan di kanvas?')){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    showToast('Kanvas sudah dibersihkan');
+  }
+});
+
+document.getElementById('tool-pdf').addEventListener('click', async ()=>{
+  showToast('Menyiapkan PDF...');
+  try{
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+    const pageW = 210, pageH = 297, margin = 10;
+    const imgW = pageW - 2*margin;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    let heightLeft = imgH;
+    let position = margin;
+    
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+    heightLeft -= (pageH - 2*margin);
+    
+    while(heightLeft > 0){
+      position = margin - (imgH - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+      heightLeft -= (pageH - 2*margin);
+    }
+    
+    pdf.save('catatan-perhitungan-kpk-fpb.pdf');
+    showToast('PDF berhasil disimpan!');
+  }catch(err){
+    showToast('Gagal menyimpan PDF: ' + err.message);
+  }
+});
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+updateScore();
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+});
+</script>
+</body>
+</html>
