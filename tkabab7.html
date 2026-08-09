@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan TKA — Bab 7 Bangun Datar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FAF5EC; --bg-warm:#F2E8D5; --card:#FFFFFF;
+  --ink:#1E1810; --ink-soft:#5A5043; --muted:#9C9181; --line:#E7DCC6;
+  --accent:#C84B31; --accent-deep:#9B3522; --accent-soft:#FBDDD3;
+  --gold:#E8A53D; --gold-soft:#FCEBC5;
+  --success:#2D7D5F; --success-soft:#D6EBDF;
+  --error:#D9544E; --error-soft:#F8D9D6;
+  --pending:#B5A99A; --pending-soft:#EFE7D6;
+  --info:#2563A6; --info-soft:#DCE8F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(200,75,49,.08), transparent 35%),
+    radial-gradient(circle at 92% 95%, rgba(232,165,61,.1), transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(45,125,95,.04), transparent 60%);
+}
+body::after{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4;
+  background-image:radial-gradient(var(--ink) 0.5px, transparent 0.5px);
+  background-size:22px 22px; opacity:.04;
+}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(250,245,236,.85);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.header-inner{
+  max-width:1280px; margin:0 auto; padding:18px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:14px}
+.brand-logo{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  color:#fff; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+  transform:rotate(-5deg); box-shadow:0 6px 18px rgba(200,75,49,.35);
+}
+.brand-text h1{
+  font-family:'Fraunces',serif; font-size:22px; font-weight:900;
+  letter-spacing:-.02em; line-height:1.1;
+}
+.brand-text p{font-size:12.5px; color:var(--ink-soft); margin-top:2px}
+
+.score-panel{
+  display:flex; align-items:center; gap:18px;
+  padding:8px 8px 8px 20px;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:100px; box-shadow:0 6px 20px rgba(31,24,16,.05);
+}
+.donut-wrap{position:relative; width:62px; height:62px}
+.donut svg{transform:rotate(-90deg); width:100%; height:100%}
+.donut circle{transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)}
+.donut-center{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900;
+}
+.donut-center .pct{font-size:17px; line-height:1}
+
+.score-stats{display:flex; gap:14px; font-size:13px; font-weight:600}
+.score-stat{display:flex; align-items:center; gap:6px}
+.dot{width:9px; height:9px; border-radius:50%}
+.dot.benar{background:var(--success)}
+.dot.salah{background:var(--error)}
+.dot.kosong{background:var(--pending)}
+.score-stat span.num{font-family:'Fraunces',serif; font-size:16px; font-weight:800}
+
+.btn-canvas, .btn-nav{
+  background:var(--ink); color:#fff; border:none;
+  padding:11px 20px; border-radius:100px;
+  font-weight:700; font-size:13.5px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:all .25s; font-family:inherit;
+}
+.btn-canvas:hover, .btn-nav:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 8px 20px rgba(200,75,49,.35)}
+.btn-canvas svg, .btn-nav svg{width:16px; height:16px}
+
+.progress-bar{height:4px; background:var(--bg-warm); position:relative; overflow:hidden}
+.progress-fill{
+  position:absolute; inset:0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  transition:width .5s ease;
+}
+
+/* ============ MAIN LAYOUT ============ */
+main{max-width:1100px; margin:0 auto; padding:36px 24px 80px}
+.intro{text-align:center; margin-bottom:42px}
+.intro .eyebrow{
+  display:inline-block; font-size:11.5px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); padding:6px 14px;
+  background:var(--accent-soft); border-radius:100px; margin-bottom:14px;
+}
+.intro h2{
+  font-family:'Fraunces',serif;
+  font-size:clamp(32px,5vw,52px); font-weight:900;
+  letter-spacing:-.025em; line-height:1.05; margin-bottom:14px;
+}
+.intro h2 em{font-style:italic; color:var(--accent)}
+.intro p{color:var(--ink-soft); max-width:620px; margin:0 auto; font-size:15px}
+
+/* ============ MATERI / SLIDE 1 ============ */
+.materi-section{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:24px; padding:40px; margin-bottom:48px;
+  box-shadow:0 4px 20px rgba(31,24,16,.04);
+}
+.materi-header{
+  text-align:center; margin-bottom:32px;
+  padding-bottom:24px; border-bottom:2px dashed var(--line);
+}
+.materi-header h3{
+  font-family:'Fraunces',serif; font-size:32px; font-weight:900;
+  margin-bottom:8px;
+}
+.materi-header p{color:var(--ink-soft); font-size:15px}
+
+.materi-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:24px; margin-bottom:24px;
+}
+@media (max-width:780px){.materi-grid{grid-template-columns:1fr}}
+
+.materi-card{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:18px; padding:24px;
+}
+.materi-card.full{grid-column:1 / -1}
+.materi-card h4{
+  font-family:'Fraunces',serif; font-size:20px; font-weight:800;
+  margin-bottom:12px; color:var(--accent-deep);
+  display:flex; align-items:center; gap:10px;
+}
+.materi-card h4 .icon{
+  width:32px; height:32px; border-radius:10px;
+  background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; font-size:18px;
+}
+.materi-card p{font-size:14.5px; margin-bottom:10px; color:var(--ink-soft)}
+.materi-card strong{color:var(--ink)}
+.materi-card ul{list-style:none; padding-left:8px}
+.materi-card ul li{
+  position:relative; padding-left:20px; margin-bottom:8px;
+  font-size:14.5px; color:var(--ink-soft);
+}
+.materi-card ul li::before{
+  content:''; position:absolute; left:0; top:9px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+}
+
+.shape-box{
+  display:flex; gap:16px; align-items:flex-start;
+  background:#fff; padding:14px; border-radius:12px;
+  margin-bottom:10px; border:1px solid var(--line);
+}
+.shape-icon{
+  width:50px; height:50px; flex-shrink:0;
+  background:var(--bg-warm); border-radius:8px;
+  display:grid; place-items:center;
+  color:var(--accent-deep);
+}
+.shape-icon svg{width:30px; height:30px}
+.shape-text p{margin:0}
+
+/* ============ QUESTION CARD ============ */
+.q-card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:22px; padding:28px 30px; margin-bottom:22px;
+  box-shadow:0 2px 10px rgba(31,24,16,.03);
+  transition:border-color .3s, box-shadow .3s;
+  position:relative; overflow:hidden;
+  opacity:0; transform:translateY(20px);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{opacity:1; transform:translateY(0)}}
+.q-card:hover{box-shadow:0 8px 30px rgba(31,24,16,.07)}
+.q-card.is-correct{border-color:rgba(45,125,95,.4)}
+.q-card.is-wrong{border-color:rgba(217,84,78,.4)}
+
+.q-card::before{
+  content:''; position:absolute; top:0; left:0; width:5px; height:100%;
+  background:var(--bg-warm); transition:background .3s;
+}
+.q-card.is-correct::before{background:var(--success)}
+.q-card.is-wrong::before{background:var(--error)}
+.q-card.is-answered::before{background:var(--accent)}
+
+.q-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; margin-bottom:18px;
+}
+.q-num-block{display:flex; align-items:center; gap:14px}
+.q-num{
+  font-family:'Fraunces',serif; font-weight:900; font-size:34px;
+  color:var(--accent); line-height:1; min-width:50px;
+}
+.q-card.is-correct .q-num{color:var(--success)}
+.q-card.is-wrong .q-num{color:var(--error)}
+.q-tag{
+  font-size:10.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 11px; border-radius:100px;
+  background:var(--bg-warm); color:var(--ink-soft);
+}
+.q-tag.hots{
+  background:linear-gradient(135deg,var(--gold),#D8902A);
+  color:#fff;
+}
+
+.q-status-pill{
+  font-size:11.5px; font-weight:700; padding:5px 12px;
+  border-radius:100px; background:var(--bg-warm); color:var(--muted);
+  letter-spacing:.05em;
+}
+.q-status-pill.benar{background:var(--success-soft); color:var(--success)}
+.q-status-pill.salah{background:var(--error-soft); color:var(--error)}
+
+.q-body{font-size:15.5px; margin-bottom:20px; color:var(--ink)}
+.q-body p{margin-bottom:6px}
+.q-body strong{font-weight:700}
+
+.context-box{
+  background:var(--bg-warm); border-radius:14px;
+  padding:14px 18px; margin-bottom:14px;
+  border-left:3px solid var(--gold);
+  font-size:14.5px;
+}
+
+/* ============ OPTIONS ============ */
+.options{display:grid; gap:10px; margin-top:8px}
+.opt{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 18px; background:var(--bg);
+  border:2px solid var(--line); border-radius:13px;
+  cursor:pointer; transition:all .2s; font-size:15px;
+  user-select:none;
+}
+.opt:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateX(2px)}
+.opt.selected{border-color:var(--accent); background:var(--accent-soft)}
+.opt.correct{border-color:var(--success); background:var(--success-soft)}
+.opt.wrong{border-color:var(--error); background:var(--error-soft)}
+.opt-mark{
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid var(--line); background:#fff;
+  display:grid; place-items:center; flex-shrink:0;
+  font-weight:700; font-size:12px; color:var(--ink-soft);
+  transition:all .2s;
+}
+.opt.selected .opt-mark{background:var(--accent); border-color:var(--accent); color:#fff}
+.opt.correct .opt-mark{background:var(--success); border-color:var(--success); color:#fff}
+.opt.wrong .opt-mark{background:var(--error); border-color:var(--error); color:#fff}
+.opt-text{flex:1}
+.opt-label{font-weight:700; color:var(--accent); margin-right:6px}
+
+.sub-item{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:14px; padding:14px 16px; margin:10px 0;
+}
+.sub-item .sub-eq{
+  font-size:15px; margin-bottom:10px; padding:8px 12px;
+  background:#fff; border-radius:8px; display:inline-block;
+}
+.bs-buttons{display:flex; gap:8px}
+.bs-btn{
+  flex:1; padding:9px 16px; border:2px solid var(--line);
+  background:#fff; border-radius:10px; cursor:pointer;
+  font-weight:600; font-size:13.5px; color:var(--ink-soft);
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+}
+.bs-btn:hover{border-color:var(--accent); color:var(--accent)}
+.bs-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.bs-btn.correct{border-color:var(--success); background:var(--success-soft); color:var(--success)}
+.bs-btn.wrong{border-color:var(--error); background:var(--error-soft); color:var(--error)}
+
+.q-actions{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+.btn{
+  padding:11px 20px; border-radius:11px;
+  font-weight:700; font-size:13.5px;
+  border:2px solid transparent; cursor:pointer;
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn-check{background:var(--ink); color:#fff}
+.btn-check:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 6px 16px rgba(200,75,49,.3)}
+.btn-check:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none}
+.btn-reset{background:transparent; color:var(--ink-soft); border-color:var(--line)}
+.btn-reset:hover{background:var(--bg-warm); color:var(--ink)}
+
+.explanation{
+  margin-top:16px; padding:18px 20px;
+  background:linear-gradient(135deg,rgba(232,165,61,.1),rgba(200,75,49,.06));
+  border-radius:14px; border-left:4px solid var(--gold);
+  font-size:14.5px; max-height:0; overflow:hidden;
+  opacity:0; transition:all .4s ease;
+  padding-top:0; padding-bottom:0; margin-top:0;
+}
+.explanation.show{
+  max-height:1000px; opacity:1;
+  padding:18px 20px; margin-top:16px;
+}
+.exp-head{
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  font-family:'Fraunces',serif; font-weight:800; font-size:16px;
+  color:var(--accent-deep);
+}
+.exp-body p{margin-bottom:8px}
+.exp-body p:last-child{margin-bottom:0}
+.exp-body .work{
+  background:#fff; padding:10px 14px; border-radius:8px;
+  display:inline-block; margin:6px 0; font-size:14px;
+  border:1px solid var(--line);
+}
+
+/* ============ CALC DRAWER ============ */
+.calc-overlay{
+  position:fixed; inset:0; background:rgba(31,24,16,.4);
+  z-index:900; opacity:0; pointer-events:none;
+  transition:opacity .3s; backdrop-filter:blur(2px);
+}
+.calc-overlay.show{opacity:1; pointer-events:auto}
+
+.calc-drawer{
+  position:fixed; top:0; right:0; height:100vh;
+  width:min(500px,100%); background:#fff; z-index:1000;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+  box-shadow:-20px 0 50px rgba(0,0,0,.15);
+}
+.calc-drawer.open{transform:translateX(0)}
+
+.calc-head{
+  padding:18px 22px; background:var(--ink); color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.calc-head h3{
+  font-family:'Fraunces',serif; font-size:19px; font-weight:800;
+  display:flex; align-items:center; gap:10px;
+}
+.calc-head .subtitle{font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px}
+.calc-close{
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(255,255,255,.1); border:none; color:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:background .2s;
+}
+.calc-close:hover{background:rgba(255,255,255,.2)}
+
+.calc-tools{
+  padding:12px 16px; background:var(--bg-warm);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.tool-btn{
+  padding:7px 13px; background:#fff;
+  border:1px solid var(--line); border-radius:9px;
+  cursor:pointer; font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all .15s; color:var(--ink); font-family:inherit;
+}
+.tool-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+.tool-btn svg{width:14px; height:14px}
+.tool-btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.tool-btn.primary:hover{background:var(--accent-deep)}
+.tool-divider{width:1px; height:24px; background:var(--line); margin:0 4px}
+
+.color-group{display:flex; gap:5px; align-items:center}
+.color-swatch{
+  width:22px; height:22px; border-radius:50%;
+  border:2px solid #fff; box-shadow:0 0 0 1px var(--line);
+  cursor:pointer; transition:transform .15s;
+}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{box-shadow:0 0 0 2px var(--accent); transform:scale(1.15)}
+
+.size-group{display:flex; gap:5px; align-items:center}
+.size-btn{
+  width:26px; height:26px; border-radius:8px;
+  border:1px solid var(--line); background:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:all .15s;
+}
+.size-btn.active{background:var(--ink); border-color:var(--ink)}
+.size-btn .dot-sm{width:4px; height:4px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-md{width:7px; height:7px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-lg{width:10px; height:10px; border-radius:50%; background:var(--ink)}
+.size-btn.active .dot-sm, .size-btn.active .dot-md, .size-btn.active .dot-lg{background:#fff}
+
+.calc-area{
+  flex:1; overflow-y:auto; background:#fff;
+  position:relative; padding:0;
+}
+.calc-area::-webkit-scrollbar{width:10px}
+.calc-area::-webkit-scrollbar-track{background:var(--bg-warm)}
+.calc-area::-webkit-scrollbar-thumb{background:var(--muted); border-radius:5px}
+
+.calc-canvas-wrap{
+  position:relative; width:100%;
+  background:#fff;
+  background-image:
+    linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+.calc-canvas-wrap canvas{
+  display:block; width:100%; height:3000px;
+  touch-action:none; cursor:crosshair;
+}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(120px);
+  background:var(--ink); color:#fff;
+  padding:13px 24px; border-radius:100px;
+  font-size:14px; font-weight:600; z-index:2000;
+  opacity:0; transition:all .35s;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  display:flex; align-items:center; gap:10px;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast .toast-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--gold);
+}
+
+/* ============ SUMMARY ============ */
+.summary-banner{
+  margin-top:32px; padding:28px 32px;
+  background:linear-gradient(135deg,var(--ink),#3a2f1f);
+  color:#fff; border-radius:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:24px; flex-wrap:wrap;
+  opacity:0; transform:translateY(20px);
+  transition:all .5s;
+}
+.summary-banner.show{opacity:1; transform:translateY(0)}
+.summary-banner h3{
+  font-family:'Fraunces',serif; font-size:24px;
+  font-weight:900; margin-bottom:6px;
+}
+.summary-banner p{font-size:14px; opacity:.8}
+.summary-stats{display:flex; gap:24px}
+.summary-stat{text-align:center}
+.summary-stat .num{
+  font-family:'Fraunces',serif; font-size:36px; font-weight:900;
+  line-height:1; color:var(--gold);
+}
+.summary-stat .lbl{font-size:11px; opacity:.7; margin-top:4px; letter-spacing:.1em; text-transform:uppercase}
+
+footer{
+  text-align:center; padding:24px;
+  color:var(--ink-soft); font-size:13px;
+  border-top:1px solid var(--line); margin-top:40px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:780px){
+  .header-inner{flex-direction:column; align-items:stretch; padding:14px 18px}
+  .brand{justify-content:flex-start}
+  .score-panel{justify-content:space-between; flex-wrap:wrap; padding:10px 14px}
+  .score-stats{flex:1; justify-content:space-around; font-size:11.5px}
+  .btn-canvas, .btn-nav{width:100%; justify-content:center}
+  .q-card{padding:22px 20px}
+  .q-num{font-size:28px; min-width:42px}
+  .intro h2{font-size:30px}
+  .materi-section{padding:24px 20px}
+  .calc-drawer{width:100%}
+  .calc-tools{padding:10px}
+}
+@media (max-width:480px){
+  .q-head{flex-direction:column; gap:8px}
+  .summary-stats{gap:14px}
+  .summary-stat .num{font-size:28px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">7</div>
+      <div class="brand-text">
+        <h1>Latihan TKA — Bab 7</h1>
+        <p>Bentuk Bangun Datar & Sifat-sifatnya</p>
+      </div>
+    </div>
+    <div class="score-panel">
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EFE7D6" stroke-width="5"/>
+            <circle id="seg-correct" cx="18" cy="18" r="15.9" fill="none" stroke="#2D7D5F" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+            <circle id="seg-wrong" cx="18" cy="18" r="15.9" fill="none" stroke="#D9544E" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="donut-center">
+          <div class="pct" id="pct-display">0<span style="font-size:11px">%</span></div>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat"><span class="dot benar"></span><span class="num" id="stat-benar">0</span><span>Benar</span></div>
+        <div class="score-stat"><span class="dot salah"></span><span class="num" id="stat-salah">0</span><span>Salah</span></div>
+        <div class="score-stat"><span class="dot kosong"></span><span class="num" id="stat-kosong">30</span><span>Belum</span></div>
+      </div>
+      <button class="btn-canvas" id="open-canvas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Kanvas Hitung
+      </button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<main>
+  <!-- ============ SLIDE 1: RANGKUMAN MATERI ============ -->
+  <section class="materi-section" id="materi">
+    <div class="materi-header">
+      <span class="eyebrow" style="background:var(--gold-soft); color:var(--accent-deep)">Rangkuman Materi</span>
+      <h3>Sifat & Jenis Bangun Datar</h3>
+      <p>Pahami konsep dasar bangun datar sebelum mengerjakan soal latihan.</p>
+    </div>
+
+    <div class="materi-grid">
+      <div class="materi-card">
+        <h4><span class="icon">△</span> Segitiga</h4>
+        <p>Bangun datar yang dibentuk oleh 3 sisi dan memiliki 3 titik sudut.</p>
+        <ul>
+          <li><strong>Segitiga Sama Sisi:</strong> 3 sisi sama panjang, 3 sudut sama besar (60°).</li>
+          <li><strong>Segitiga Sama Kaki:</strong> 2 sisi sama panjang, 2 sudut sama besar.</li>
+          <li><strong>Segitiga Siku-siku:</strong> Memiliki 1 sudut 90°.</li>
+          <li><strong>Segitiga Sembarang:</strong> Sisi dan sudut tidak sama panjang/besar.</li>
+        </ul>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">▢</span> Segi Empat (Persegi & Persegi Panjang)</h4>
+        <ul>
+          <li><strong>Persegi:</strong> 4 sisi sama panjang, 4 sudut 90°, simetri lipat 4, simetri putar 4.</li>
+          <li><strong>Persegi Panjang:</strong> Sisi hadap sejajar sama panjang, 4 sudut 90°, simetri lipat 2, simetri putar 2.</li>
+        </ul>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">▱</span> Jajar Genjang & Trapesium</h4>
+        <ul>
+          <li><strong>Jajar Genjang:</strong> 2 pasang sisi sejajar sama panjang, sudut berhadapan sama besar, tidak ada simetri lipat (umumnya), simetri putar 2.</li>
+          <li><strong>Trapesium:</strong> Hanya 1 pasang sisi sejajar. <em>Trapesium Sama Kaki</em> memiliki sisi non-sejajar sama panjang dan simetri lipat 1.</li>
+        </ul>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">◇</span> Belah Ketupat & Layang-layang</h4>
+        <ul>
+          <li><strong>Belah Ketupat:</strong> 4 sisi sama panjang, diagonal tegak lurus, simetri lipat 2, simetri putar 2.</li>
+          <li><strong>Layang-layang:</strong> 2 pasang sisi sama panjang berdekatan, diagonal tegak lurus, simetri lipat 1.</li>
+        </ul>
+      </div>
+
+      <div class="materi-card full">
+        <h4><span class="icon">○</span> Lingkaran & Simetri</h4>
+        <div class="shape-box">
+          <div class="shape-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+          </div>
+          <div class="shape-text">
+            <p><strong>Lingkaran:</strong> Kumpulan titik berjarak sama dari titik pusat. Memiliki simetri lipat tak terhingga dan simetri putar tak terhingga.</p>
+          </div>
+        </div>
+        <div class="shape-box">
+          <div class="shape-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18"/></svg>
+          </div>
+          <div class="shape-text">
+            <p><strong>Simetri Lipat:</strong> Lipatan yang membagi bangun menjadi dua bagian sama persis.</p>
+            <p><strong>Simetri Putar:</strong> Posisi bangun saat diputar terlihat sama dengan posisi semula dalam satu putaran penuh (360°).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:32px">
+      <button class="btn-nav" onclick="document.getElementById('latihan').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Mulai Latihan Soal
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: LATIHAN SOAL ============ -->
+  <section id="latihan">
+    <div class="intro">
+      <span class="eyebrow">Bab 7 · Bangun Datar</span>
+      <h2>Latihan <em>Soal Interaktif</em></h2>
+      <p>30 soal pilihan ganda, benar-salah, dan kompleks. Kerjakan dengan tenang — gunakan kanvas hitung untuk coret-coret. Skor live mengisi lingkaran saat kamu mengecek jawaban.</p>
+    </div>
+    <div id="questions"></div>
+    
+    <div class="summary-banner" id="summary-banner">
+      <div>
+        <h3 id="summary-title">Kerjakan dulu semua soalnya ya!</h3>
+        <p id="summary-msg">Selesaikan 30 soal berikut, lalu lihat hasil akhirnya di sini.</p>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat"><div class="num" id="sum-benar">0</div><div class="lbl">Benar</div></div>
+        <div class="summary-stat"><div class="num" id="sum-salah">0</div><div class="lbl">Salah</div></div>
+        <div class="summary-stat"><div class="num" id="sum-score">0</div><div class="lbl">Skor</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Media Latihan TKA · Bab 7 Bangun Datar · Dibuat untuk pembelajaran interaktif
+</footer>
+
+<!-- ============ CALC DRAWER ============ -->
+<div class="calc-overlay" id="calc-overlay"></div>
+<aside class="calc-drawer" id="calc-drawer">
+  <div class="calc-head">
+    <div>
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 15h6M9 12h6"/></svg>
+        Kanvas Hitung
+      </h3>
+      <div class="subtitle">Coret perhitunganmu di sini — bisa discroll, bisa di-export PDF</div>
+    </div>
+    <button class="calc-close" id="calc-close" aria-label="Tutup kanvas">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="calc-tools">
+    <div class="color-group">
+      <div class="color-swatch active" style="background:#1E1810" data-color="#1E1810"></div>
+      <div class="color-swatch" style="background:#C84B31" data-color="#C84B31"></div>
+      <div class="color-swatch" style="background:#2D7D5F" data-color="#2D7D5F"></div>
+      <div class="color-swatch" style="background:#2563A6" data-color="#2563A6"></div>
+      <div class="color-swatch" style="background:#E8A53D" data-color="#E8A53D"></div>
+    </div>
+    <div class="tool-divider"></div>
+    <div class="size-group">
+      <button class="size-btn" data-size="2"><span class="dot-sm"></span></button>
+      <button class="size-btn active" data-size="3.5"><span class="dot-md"></span></button>
+      <button class="size-btn" data-size="6"><span class="dot-lg"></span></button>
+    </div>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" id="tool-clear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Hapus
+    </button>
+    <button class="tool-btn primary" id="tool-pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Simpan PDF
+    </button>
+  </div>
+  <div class="calc-area" id="calc-area">
+    <div class="calc-canvas-wrap">
+      <canvas id="calc-canvas"></canvas>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg">Pesan</span></div>
+
+<script>
+/* ===================================================================
+   DATA SOAL — 30 soal (10 dasar + 20 HOTS)
+   =================================================================== */
+const questions = [
+  // ============ SOAL 1 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Bangun datar yang memiliki 3 sisi dan 3 sudut disebut...</p>`,
+    options:[
+      {label:'A', text:`Persegi`},
+      {label:'B', text:`Segitiga`},
+      {label:'C', text:`Trapesium`},
+      {label:'D', text:`Lingkaran`}
+    ],
+    correct:[1],
+    explanation:`<p>Berdasarkan definisi dasar, segitiga adalah bangun datar yang dibentuk oleh 3 buah sisi (garis lurus) dan memiliki 3 titik sudut.</p>`
+  },
+
+  // ============ SOAL 2 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Kelompokkan bangun datar berikut berdasarkan sifat 'memiliki 4 sisi sama panjang'.</p>`,
+    items:[
+      {eq:`Persegi memiliki 4 sisi sama panjang.`, correct:true, exp:`Benar. Persegi memiliki 4 sisi yang sama panjang.`},
+      {eq:`Persegi panjang memiliki 4 sisi sama panjang.`, correct:false, exp:`Salah. Persegi panjang hanya memiliki sisi-sisi yang berhadapan sama panjang, bukan keempat sisinya.`},
+      {eq:`Belah ketupat memiliki 4 sisi sama panjang.`, correct:true, exp:`Benar. Belah ketupat memiliki 4 sisi yang sama panjang.`}
+    ]
+  },
+
+  // ============ SOAL 3 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Sebuah segitiga memiliki sudut 90°, 45°, dan 45°. Berdasarkan besar sudut dan panjang sisinya, segitiga tersebut adalah...</p>`,
+    options:[
+      {label:'A', text:`Segitiga sama sisi`},
+      {label:'B', text:`Segitiga siku-siku sama kaki`},
+      {label:'C', text:`Segitiga tumpul`},
+      {label:'D', text:`Segitiga sembarang`}
+    ],
+    correct:[1],
+    explanation:`<p>Memiliki sudut 90° berarti ia segitiga siku-siku. Memiliki dua sudut 45° berarti dua sisi di hadapannya sama panjang, sehingga ia juga sama kaki.</p>`
+  },
+
+  // ============ SOAL 4 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<p>Manakah di bawah ini yang merupakan sifat dari bangun trapesium sama kaki? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Memiliki sepasang sisi sejajar`},
+      {label:'B', text:`Kedua sisi non-sejajarnya sama panjang`},
+      {label:'C', text:`Memiliki 1 simetri lipat`},
+      {label:'D', text:`Keempat sisinya sama panjang`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Trapesium sama kaki memiliki tepat satu pasang sisi sejajar, sisi yang tidak sejajar memiliki panjang yang sama, dan memiliki 1 simetri lipat vertikal.</p>`
+  },
+
+  // ============ SOAL 5 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Sebuah papan pengumuman berbentuk persegi panjang. Jika salah satu sudutnya dipotong lurus, bentuk baru apa yang paling mungkin terbentuk?</div>`,
+    options:[
+      {label:'A', text:`Persegi panjang baru`},
+      {label:'B', text:`Segitiga`},
+      {label:'C', text:`Trapesium`},
+      {label:'D', text:`Pentagon (segi lima)`}
+    ],
+    correct:[3],
+    explanation:`<p>Persegi panjang memiliki 4 sudut. Jika satu sudutnya "dipotong lurus", satu sudut siku-siku berubah menjadi 2 sudut siku-siku baru. Total sisi menjadi 5 (Pentagon) dengan 5 sudut.</p>`
+  },
+
+  // ============ SOAL 6 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<div class="context-box">Sebuah ubin lantai berbentuk persegi. Ubin tersebut dipotong tepat di sepanjang salah satu diagonalnya.</div>`,
+    items:[
+      {eq:`Akan terbentuk dua buah bangun segitiga.`, correct:true, exp:`Benar. Diagonal pada persegi akan membaginya menjadi dua segitiga.`},
+      {eq:`Kedua segitiga yang terbentuk pasti kongruen (sama bentuk dan ukuran).`, correct:true, exp:`Benar. Karena persegi memiliki sisi dan sudut yang sama, potongan diagonal menghasilkan dua segitiga siku-siku sama kaki yang identik.`},
+      {eq:`Setiap segitiga yang terbentuk adalah segitiga tumpul.`, correct:false, exp:`Salah. Segitiga tersebut adalah segitiga siku-siku (memiliki sudut 90° dari sudut persegi).`}
+    ]
+  },
+
+  // ============ SOAL 7 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Sebuah bangun datar memiliki ciri-ciri: 4 sisi, 2 pasang sisi sejajar, 4 sudut siku-siku, dan 2 pasang sisi sama panjang. Bangun apakah yang PASTI memiliki semua sifat tersebut?</p>`,
+    options:[
+      {label:'A', text:`Jajar genjang`},
+      {label:'B', text:`Belah ketupat`},
+      {label:'C', text:`Persegi panjang`},
+      {label:'D', text:`Trapesium`}
+    ],
+    correct:[2],
+    explanation:`<p>Persegi panjang memiliki 4 sudut siku-siku dan 2 pasang sisi sejajar yang sama panjang. (Catatan: Persegi juga memenuhi ini, tetapi opsi yang paling tepat dari pilihan adalah Persegi Panjang).</p>`
+  },
+
+  // ============ SOAL 8 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<p>Dua buah segitiga siku-siku yang identik digabungkan pada sisi miringnya. Bangun datar apa yang dapat terbentuk? <em>(Pilih semua jawaban yang mungkin)</em></p>`,
+    options:[
+      {label:'A', text:`Persegi panjang`},
+      {label:'B', text:`Persegi`},
+      {label:'C', text:`Belah ketupat`},
+      {label:'D', text:`Layang-layang`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Menggabungkan dua segitiga siku-siku identik di sisi miringnya akan menghasilkan persegi panjang (atau persegi jika segitiganya sama kaki). Karena persegi dan belah ketupat adalah bentuk khusus persegi panjang/jajar genjang, keduanya juga mungkin terbentuk tergantung jenis segitiga siku-sikunya.</p>`
+  },
+
+  // ============ SOAL 9 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Jumlah sudut dalam sebuah segi-n beraturan dapat dihitung dengan rumus (n-2) × 180°. Berapakah besar setiap sudut dalam sebuah segi delapan (oktagon) beraturan?</p>`,
+    options:[
+      {label:'A', text:`108°`},
+      {label:'B', text:`120°`},
+      {label:'C', text:`135°`},
+      {label:'D', text:`150°`}
+    ],
+    correct:[2],
+    explanation:`<p>Untuk segi-8 (n=8):<br>Total sudut = (8-2) × 180° = 6 × 180° = 1080°.<br>Besar setiap sudut = 1080° / 8 = 135°.</p>`
+  },
+
+  // ============ SOAL 10 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Semua persegi adalah persegi panjang, tetapi tidak semua persegi panjang adalah persegi. Evaluasi pernyataan logika ini.</p>`,
+    items:[
+      {eq:`Pernyataan 'Semua persegi adalah persegi panjang' benar karena persegi memenuhi semua syarat persegi panjang.`, correct:true, exp:`Benar. Persegi memenuhi syarat persegi panjang (4 sudut siku-siku, sisi hadap sejajar).`},
+      {eq:`Pernyataan 'Tidak semua persegi panjang adalah persegi' benar karena persegi panjang tidak harus memiliki 4 sisi sama panjang.`, correct:true, exp:`Benar. Persegi panjang bisa memiliki panjang dan lebar berbeda.`},
+      {eq:`Persegi adalah bentuk khusus dari persegi panjang.`, correct:true, exp:`Benar. Persegi adalah persegi panjang yang keempat sisinya sama panjang.`}
+    ]
+  },
+
+  // ============ SOAL 11 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah bangun datar memiliki 4 sisi sama panjang, tetapi tidak memiliki sudut siku-siku.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Bangun tersebut pasti belah ketupat.`, correct:true, exp:`Belah ketupat memiliki 4 sisi sama panjang dan tidak harus memiliki sudut siku-siku. Benar.`},
+      {eq:`Bangun tersebut memiliki diagonal yang saling tegak lurus.`, correct:true, exp:`Sifat belah ketupat: diagonal saling tegak lurus. Benar.`},
+      {eq:`Bangun tersebut tidak memiliki simetri lipat.`, correct:false, exp:`Belah ketupat memiliki 2 simetri lipat (sepanjang diagonalnya). Salah.`}
+    ]
+  },
+
+  // ============ SOAL 12 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah segi-n beraturan memiliki besar sudut dalam 144°. Bangun tersebut adalah...</p>`,
+    options:[
+      {label:'A', text:`Segi delapan (Oktagon)`},
+      {label:'B', text:`Segi sembilan (Nonagon)`},
+      {label:'C', text:`Segi sepuluh (Dekagon)`},
+      {label:'D', text:`Segi dua belas (Dodekagon)`}
+    ],
+    correct:[2],
+    explanation:`<p>Rumus sudut dalam segi-n beraturan: ((n-2) × 180°) / n = 144°.<br>180n - 360 = 144n<br>36n = 360<br>n = 10. Jadi, bangun tersebut adalah segi sepuluh (Dekagon).</p>`
+  },
+
+  // ============ SOAL 13 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah pernyataan berikut yang benar mengenai hubungan antar bangun datar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Semua persegi adalah belah ketupat.`},
+      {label:'B', text:`Semua belah ketupat adalah layang-layang.`},
+      {label:'C', text:`Semua persegi panjang adalah jajar genjang.`},
+      {label:'D', text:`Semua jajar genjang adalah trapesium.`},
+      {label:'E', text:`Trapesium sama kaki adalah belah ketupat.`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>A: Persegi memenuhi syarat belah ketupat (4 sisi sama) (Benar).<br>B: Belah ketupat memenuhi syarat layang-layang (2 pasang sisi sama berdekatan) (Benar).<br>C: Persegi panjang memenuhi syarat jajar genjang (2 pasang sisi sejajar) (Benar).<br>D: Jajar genjang memiliki 2 pasang sisi sejajar, sedangkan trapesium (berdasarkan definisi sempit) hanya tepat 1 pasang. (Salah).<br>E: Trapesium sama kaki hanya memiliki 1 pasang sisi sejajar, bukan 4 sisi sama. (Salah).</p>`
+  },
+
+  // ============ SOAL 14 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah layang-layang dipotong sepanjang salah satu diagonainya.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Jika dipotong sepanjang diagonal sumbu simetrinya, akan terbentuk dua segitiga kongruen.`, correct:true, exp:`Diagonal sumbu simetri membagi layang-layang menjadi dua bagian identik (kongruen). Benar.`},
+      {eq:`Jika dipotong sepanjang diagonal yang bukan sumbu simetri, akan terbentuk dua segitiga sama kaki.`, correct:true, exp:`Diagonal ini menghubungkan dua sudut antara sisi-sisi yang berbeda panjang, sehingga menghasilkan dua segitiga sama kaki. Benar.`},
+      {eq:`Kedua diagonal layang-layang saling membagi dua sama panjang.`, correct:false, exp:`Hanya satu diagonal (sumbu simetri) yang membagi dua sama panjang diagonal yang lain. Salah.`}
+    ]
+  },
+
+  // ============ SOAL 15 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Bangun datar yang memiliki 2 pasang sisi sama panjang berdekatan, diagonalnya saling tegak lurus, tetapi TIDAK semua diagonalnya saling membagi dua sama panjang, adalah...</p>`,
+    options:[
+      {label:'A', text:`Belah ketupat`},
+      {label:'B', text:`Layang-layang`},
+      {label:'C', text:`Trapesium sama kaki`},
+      {label:'D', text:`Jajar genjang`}
+    ],
+    correct:[1],
+    explanation:`<p>Layang-layang memiliki 2 pasang sisi sama panjang berdekatan dan diagonal saling tegak lurus. Namun, hanya satu diagonal yang membagi dua sama panjang diagonal yang lain (diagonal yang menjadi sumbu simetri membagi dua diagonal lainnya). Pada belah ketupat, kedua diagonal saling membagi dua sama panjang.</p>`
+  },
+
+  // ============ SOAL 16 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah segitiga siku-siku dipotong oleh garis tinggi dari titik sudut siku-sikunya menuju sisi miring.</div>
+      <p>Manakah pernyataan yang benar mengenai dua segitiga baru yang terbentuk? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Kedua segitiga baru tersebut sama-sama siku-siku.`},
+      {label:'B', text:`Kedua segitiga baru tersebut sebangun dengan segitiga aslinya.`},
+      {label:'C', text:`Kedua segitiga baru tersebut pasti kongruen satu sama lain.`},
+      {label:'D', text:`Sudut-sudut yang bersesuaian pada kedua segitiga baru sama besar.`}
+    ],
+    correct:[0,1,3],
+    explanation:`<p>Garis tinggi dari sudut siku-siku menciptakan dua segitiga siku-siku baru (A benar). Kedua segitiga ini sebangun dengan segitiga aslinya dan satu sama lain (B benar). Namun, mereka belum tentu kongruen kecuali segitiga aslinya adalah segitiga siku-siku sama kaki (C salah). Karena sebangun, sudut bersesuaian sama besar (D benar).</p>`
+  },
+
+  // ============ SOAL 17 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Perhatikan sebuah bangun jajar genjang.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Jika salah satu sudutnya 60°, maka sudut berhadapannya juga 60°.`, correct:true, exp:`Pada jajar genjang, sudut-sudut yang berhadapan sama besar. Benar.`},
+      {eq:`Jika salah satu sudutnya 60°, maka sudut di sebelahnya adalah 100°.`, correct:false, exp:`Sudut yang bersebelahan berjumlah 180° (berpelurus). Jika satu 60°, yang sebelahnya adalah 180° - 60° = 120°. Salah.`},
+      {eq:`Jumlah keempat sudut jajar genjang selalu 360°.`, correct:true, exp:`Keempat bangun segiempat selalu memiliki total sudut 360°. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 18 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Suatu bangun datar memiliki simetri lipat sebanyak 0 dan simetri putar sebanyak 2 (selain posisi awal). Bangun tersebut kemungkinan besar adalah...</p>`,
+    options:[
+      {label:'A', text:`Belah ketupat`},
+      {label:'B', text:`Persegi panjang`},
+      {label:'C', text:`Jajar genjang`},
+      {label:'D', text:`Layang-layang`}
+    ],
+    correct:[2],
+    explanation:`<p>Jajar genjang tidak memiliki simetri lipat (umumnya, kecuali bentuk khusus seperti persegi panjang atau belah ketupat), tetapi memiliki simetri putar sebanyak 2 (yaitu pada rotasi 180° dan 360°).</p>`
+  },
+
+  // ============ SOAL 19 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Bangun segi-empat berikut yang memiliki kedua diagonal sama panjang adalah... <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Persegi`},
+      {label:'B', text:`Persegi panjang`},
+      {label:'C', text:`Trapesium sama kaki`},
+      {label:'D', text:`Belah ketupat`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Persegi, persegi panjang, dan trapesium sama kaki memiliki kedua diagonal yang sama panjang. Pada belah ketupat, umumnya kedua diagonalnya tidak sama panjang.</p>`
+  },
+
+  // ============ SOAL 20 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Dua buah segitiga identik digabungkan.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Jika digabung pada sisi yang sama panjangnya, pasti terbentuk belah ketupat.`, correct:false, exp:`Tergantung di sisi mana digabung. Jika digabung pada sisi terpanjang (sisi miring) dari segitiga siku-siku, akan terbentuk persegi panjang. Salah.`},
+      {eq:`Jika dua segitiga siku-siku sama kaki digabung pada sisi miringnya, terbentuk persegi.`, correct:true, exp:`Segitiga siku-siku sama kaki memiliki sudut 45-90-45. Jika digabung di sisi miring, keempat sudutnya menjadi 90° dan semua sisi sama panjang. Benar.`},
+      {eq:`Jika dua segitiga sembarang identik digabungkan pada sisi yang bersesuaian, terbentuk jajar genjang.`, correct:true, exp:`Penggabungan dua segitiga kongruen pada sisi yang sesuai akan menghasilkan bangun dengan 2 pasang sisi sejajar, yaitu jajar genjang. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 21 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah segi-5 (pentagon) beraturan memiliki simetri lipat dan simetri putar sebanyak...</p>`,
+    options:[
+      {label:'A', text:`5 simetri lipat dan 5 simetri putar`},
+      {label:'B', text:`5 simetri lipat dan 10 simetri putar`},
+      {label:'C', text:`10 simetri lipat dan 5 simetri putar`},
+      {label:'D', text:`5 simetri lipat dan 0 simetri putar`}
+    ],
+    correct:[0],
+    explanation:`<p>Setiap poligon beraturan memiliki jumlah simetri lipat dan simetri putar yang sama dengan jumlah sisinya. Segi-5 beraturan memiliki 5 simetri lipat dan 5 simetri putar.</p>`
+  },
+
+  // ============ SOAL 22 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah bangun datar berikut yang memiliki TEPAT 1 simetri lipat? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Layang-layang`},
+      {label:'B', text:`Trapesium sama kaki`},
+      {label:'C', text:`Segitiga sama kaki`},
+      {label:'D', text:`Trapesium siku-siku`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Layang-layang, trapesium sama kaki, dan segitiga sama kaki masing-masing hanya memiliki 1 garis sumbu simetri lipat. Trapesium siku-siku tidak memiliki simetri lipat.</p>`
+  },
+
+  // ============ SOAL 23 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Perhatikan pernyataan tentang sudut dalam poligon berikut.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Sudut dalam segi-6 (heksagon) beraturan lebih besar daripada sudut dalam segi-5 (pentagon) beraturan.`, correct:true, exp:`Sudut heksagon = 120°, pentagon = 108°. 120 > 108. Benar.`},
+      {eq:`Jumlah sudut dalam segi-8 (oktagon) adalah 1080°.`, correct:true, exp:`(8-2) x 180 = 6 x 180 = 1080°. Benar.`},
+      {eq:`Jika sebuah poligon memiliki jumlah sudut 540°, maka poligon tersebut adalah segi-6.`, correct:false, exp:`(n-2) x 180 = 540 -> n-2 = 3 -> n = 5. Poligon tersebut adalah segi-5. Salah.`}
+    ]
+  },
+
+  // ============ SOAL 24 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Suatu bangun datar memiliki 4 sisi, hanya 1 pasang sisi sejajar, dan tidak memiliki simetri lipat. Bangun tersebut adalah...</p>`,
+    options:[
+      {label:'A', text:`Trapesium sembarang`},
+      {label:'B', text:`Trapesium sama kaki`},
+      {label:'C', text:`Jajar genjang`},
+      {label:'D', text:`Belah ketupat`}
+    ],
+    correct:[0],
+    explanation:`<p>Trapesium memiliki 1 pasang sisi sejajar. Jika tidak memiliki simetri lipat, maka bukan trapesium sama kaki, melainkan trapesium sembarang (atau siku-siku).</p>`
+  },
+
+  // ============ SOAL 25 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah trapesium ABCD dengan sisi AB sejajar CD. Diketahui sudut A = 50° dan sudut B = 130°.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Trapesium tersebut pasti jajar genjang.`},
+      {label:'B', text:`Sudut C = 50°.`},
+      {label:'C', text:`Sudut D = 130°.`},
+      {label:'D', text:`Jika sudut A = C dan B = D, maka trapesium tersebut adalah trapesium sama kaki.`}
+    ],
+    correct:[1,2,3],
+    explanation:`<p>Karena AB || CD, maka sudut A + D = 180° (A dan D bersebelahan pada kaki trapesium).<br>50 + D = 180 -> D = 130° (C benar).<br>Begitu juga B + C = 180 -> 130 + C = 180 -> C = 50° (B benar).<br>Jika A=C dan B=D, berarti sudut yang berhadapan sama besar, ini adalah ciri trapesium sama kaki (D benar). Trapesium ini bukan jajar genjang karena AB dan CD belum tentu sama panjang (A salah).</p>`
+  },
+
+  // ============ SOAL 26 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Evaluasi pernyataan simetri bangun datar berikut.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Belah ketupat memiliki 2 simetri lipat dan 2 simetri putar.`, correct:true, exp:`Benar. Belah ketupat memiliki 2 sumbu simetri (diagonalnya) dan simetri putar tingkat 2 (180° dan 360°).`},
+      {eq:`Persegi panjang memiliki 4 simetri lipat.`, correct:false, exp:`Salah. Persegi panjang hanya memiliki 2 simetri lipat (vertikal dan horizontal).`},
+      {eq:`Lingkaran memiliki simetri putar tak terhingga.`, correct:true, exp:`Benar. Lingkaran dapat diputar pada sudut berapapun dan terlihat sama.`}
+    ]
+  },
+
+  // ============ SOAL 27 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Bangun datar yang memiliki simetri lipat 1 dan tidak memiliki simetri putar (selain 1 kali putaran penuh) adalah...</p>`,
+    options:[
+      {label:'A', text:`Persegi panjang`},
+      {label:'B', text:`Segitiga sama kaki`},
+      {label:'C', text:`Belah ketupat`},
+      {label:'D', text:`Trapesium sembarang`}
+    ],
+    correct:[1],
+    explanation:`<p>Segitiga sama kaki hanya memiliki 1 sumbu simetri lipat, tetapi ketika diputar tidak terlihat sama dengan posisi semula kecuali diputar 360° (1 kali). Jadi tidak memiliki simetri putar (selain tingkat 1).</p>`
+  },
+
+  // ============ SOAL 28 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah bangun datar yang SEMUA diagonalnya berfungsi sebagai sumbu simetri lipat? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Persegi`},
+      {label:'B', text:`Persegi panjang`},
+      {label:'C', text:`Belah ketupat`},
+      {label:'D', text:`Layang-layang`}
+    ],
+    correct:[0,2],
+    explanation:`<p>Pada persegi dan belah ketupat, kedua diagonalnya merupakan sumbu simetri lipat. Pada persegi panjang dan layang-layang, hanya ada satu atau bahkan tidak ada diagonal yang berfungsi sebagai sumbu simetri lipat.</p>`
+  },
+
+  // ============ SOAL 29 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Bangun datar A memiliki 4 sisi sama panjang. Bangun datar B memiliki 4 sudut siku-siku.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      {eq:`Jika A = B, maka bangun tersebut adalah persegi.`, correct:true, exp:`Jika 4 sisi sama panjang DAN 4 sudut siku-siku, bangun tersebut adalah persegi. Benar.`},
+      {eq:`Bangun A pasti belah ketupat.`, correct:true, exp:`Bangun dengan 4 sisi sama panjang pasti belah ketupat (atau bentuk khususnya). Benar.`},
+      {eq:`Bangun B pasti persegi panjang.`, correct:true, exp:`Bangun dengan 4 sudut siku-siku pasti persegi panjang. Benar.`}
+    ]
+  },
+
+  // ============ SOAL 30 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah poligon beraturan memiliki besar sudut dalam 150°. Bangun ini memiliki simetri lipat sebanyak...</p>`,
+    options:[
+      {label:'A', text:`8`},
+      {label:'B', text:`10`},
+      {label:'C', text:`12`},
+      {label:'D', text:`15`}
+    ],
+    correct:[2],
+    explanation:`<p>((n-2) × 180°) / n = 150°.<br>180n - 360 = 150n<br>30n = 360<br>n = 12.<br>Pada poligon beraturan, jumlah simetri lipat = jumlah sisi. Jadi simetri lipatnya ada 12.</p>`
+  }
+];
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+const state = {
+  answers: questions.map(q => q.type==='bs-multi' ? q.items.map(()=>null) : []),
+  checked: questions.map(()=>false)
+};
+
+/* ===================================================================
+   RENDER SOAL
+   =================================================================== */
+const container = document.getElementById('questions');
+
+function renderQuestion(q, idx){
+  const card = document.createElement('section');
+  card.className = 'q-card';
+  card.id = `q-${idx}`;
+  card.style.animationDelay = `${Math.min(idx*40,400)}ms`;
+
+  const hotsBadge = q.hots ? '<span class="q-tag hots">HOTS</span>' : '';
+  let statusPill = '<span class="q-status-pill" id="status-'+idx+'">Belum dijawab</span>';
+
+  let html = `
+    <div class="q-head">
+      <div class="q-num-block">
+        <div class="q-num">${String(idx+1).padStart(2,'0')}</div>
+        <div>
+          <span class="q-tag">${q.tag}</span> ${hotsBadge}
+        </div>
+      </div>
+      ${statusPill}
+    </div>
+    <div class="q-body">${q.body}</div>
+  `;
+
+  if(q.type === 'pg'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark">${opt.label}</div>
+        <div class="opt-text">${opt.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'pgk'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark" style="border-radius:5px">✓</div>
+        <div class="opt-text"><span class="opt-label">${opt.label}.</span>${opt.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'bs-multi'){
+    q.items.forEach((it,i)=>{
+      html += `<div class="sub-item">
+        <div class="sub-eq">${it.eq}</div>
+        <div class="bs-buttons">
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="true">BENAR</button>
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="false">SALAH</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `
+    <div class="q-actions">
+      <button class="btn btn-check" id="check-${idx}" data-q="${idx}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Cek Jawaban
+      </button>
+      <button class="btn btn-reset" id="reset-${idx}" data-q="${idx}">Reset</button>
+    </div>
+    <div class="explanation" id="exp-${idx}">
+      <div class="exp-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Pembahasan
+      </div>
+      <div class="exp-body"></div>
+    </div>
+  `;
+
+  card.innerHTML = html;
+  return card;
+}
+
+questions.forEach((q,i)=> container.appendChild(renderQuestion(q,i)));
+
+/* ===================================================================
+   EVENT HANDLERS — PILIH JAWABAN
+   =================================================================== */
+document.querySelectorAll('.opt').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const type = questions[q].type;
+    if(state.checked[q]) return;
+
+    if(type === 'pg'){
+      state.answers[q] = [i];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.toggle('selected', +o.dataset.i === i);
+      });
+    } else if(type === 'pgk'){
+      if(!state.answers[q].includes(i)) state.answers[q].push(i);
+      else state.answers[q] = state.answers[q].filter(x=>x!==i);
+      el.classList.toggle('selected');
+    }
+    updateStatusPill(q);
+  });
+});
+
+document.querySelectorAll('.bs-btn').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const v = el.dataset.v === 'true';
+    if(state.checked[q]) return;
+
+    state.answers[q][i] = v;
+    
+    const siblings = el.parentElement.querySelectorAll('.bs-btn');
+    siblings.forEach(s=>{
+      s.classList.remove('selected','correct','wrong');
+    });
+    el.classList.add('selected');
+    
+    updateStatusPill(q);
+  });
+});
+
+function updateStatusPill(q){
+  const pill = document.getElementById('status-'+q);
+  const answered = isAnswered(q);
+  if(state.checked[q]){
+    // sudah dicek
+  } else if(answered){
+    pill.textContent = 'Sudah dijawab';
+    pill.style.background = 'var(--accent-soft)';
+    pill.style.color = 'var(--accent)';
+  } else {
+    pill.textContent = 'Belum dijawab';
+    pill.style.background = '';
+    pill.style.color = '';
+  }
+}
+
+function isAnswered(q){
+  const type = questions[q].type;
+  if(type === 'pg') return state.answers[q].length > 0;
+  if(type === 'pgk') return state.answers[q].length > 0;
+  if(type === 'bs-multi') return state.answers[q].every(a => a !== null);
+  return false;
+}
+
+/* ===================================================================
+   CEK JAWABAN
+   =================================================================== */
+document.querySelectorAll('.btn-check').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    if(!isAnswered(q)){
+      showToast('Isi dulu semua jawaban di soal ini ya!');
+      return;
+    }
+    if(state.checked[q]) return;
+    state.checked[q] = true;
+    evaluateAnswer(q);
+    updateScore();
+    updateStatusPill(q);
+    document.getElementById('exp-'+q).classList.add('show');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Sudah Dicek`;
+  });
+});
+
+document.querySelectorAll('.btn-reset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    const type = questions[q].type;
+    if(type === 'pg' || type === 'pgk'){
+      state.answers[q] = [];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.remove('selected','correct','wrong');
+      });
+    } else {
+      state.answers[q] = questions[q].items.map(()=>null);
+      document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+        b.classList.remove('selected','correct','wrong');
+      });
+    }
+    state.checked[q] = false;
+    document.getElementById('exp-'+q).classList.remove('show');
+    const checkBtn = document.getElementById('check-'+q);
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Cek Jawaban`;
+    const card = document.getElementById('q-'+q);
+    card.classList.remove('is-correct','is-wrong','is-answered');
+    const pill = document.getElementById('status-'+q);
+    pill.textContent = 'Belum dijawab';
+    pill.className = 'q-status-pill';
+    updateScore();
+    updateStatusPill(q);
+  });
+});
+
+function evaluateAnswer(q){
+  const type = questions[q].type;
+  const card = document.getElementById('q-'+q);
+  const pill = document.getElementById('status-'+q);
+  let isCorrect = false;
+
+  if(type === 'pg'){
+    const selected = state.answers[q][0];
+    const correctIdx = questions[q].correct[0];
+    isCorrect = selected === correctIdx;
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(i === correctIdx) o.classList.add('correct');
+      else if(i === selected) o.classList.add('wrong');
+    });
+  } else if(type === 'pgk'){
+    const selected = [...state.answers[q]].sort();
+    const correct = [...questions[q].correct].sort();
+    isCorrect = selected.length === correct.length && selected.every((v,i)=>v===correct[i]);
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(questions[q].correct.includes(i)) o.classList.add('correct');
+      else if(state.answers[q].includes(i)) o.classList.add('wrong');
+    });
+  } else if(type === 'bs-multi'){
+    isCorrect = questions[q].items.every((it,i)=> state.answers[q][i] === it.correct);
+    document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+      const i = +b.dataset.i;
+      const v = b.dataset.v === 'true';
+      b.classList.remove('selected','correct','wrong');
+      const item = questions[q].items[i];
+      const studentSelected = state.answers[q][i] === v;
+      const isThisCorrect = v === item.correct;
+
+      if(studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      } else if(studentSelected && !isThisCorrect){
+        b.classList.add('wrong');
+      } else if(!studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      }
+    });
+  }
+
+  if(isCorrect){
+    card.classList.add('is-correct');
+    pill.textContent = '✓ Benar';
+    pill.className = 'q-status-pill benar';
+  } else {
+    card.classList.add('is-wrong');
+    pill.textContent = '✗ Salah';
+    pill.className = 'q-status-pill salah';
+  }
+  card.classList.add('is-answered');
+
+  const expBody = document.querySelector(`#exp-${q} .exp-body`);
+  if(type === 'bs-multi'){
+    let html = '';
+    questions[q].items.forEach((it,i)=>{
+      html += `<p><strong>${String.fromCharCode(97+i)}.</strong> ${it.exp}</p>`;
+    });
+    expBody.innerHTML = html;
+  } else {
+    expBody.innerHTML = questions[q].explanation;
+  }
+}
+
+/* ===================================================================
+   UPDATE SCORE & DONUT
+   =================================================================== */
+function updateScore(){
+  let benar = 0, salah = 0, kosong = 0;
+  state.checked.forEach((c,i)=>{
+    if(!c){ kosong++; return; }
+    const type = questions[i].type;
+    let isCorrect = false;
+    if(type === 'pg'){
+      isCorrect = state.answers[i][0] === questions[i].correct[0];
+    } else if(type === 'pgk'){
+      const sel = [...state.answers[i]].sort();
+      const cor = [...questions[i].correct].sort();
+      isCorrect = sel.length === cor.length && sel.every((v,k)=>v===cor[k]);
+    } else if(type === 'bs-multi'){
+      isCorrect = questions[i].items.every((it,k)=> state.answers[i][k] === it.correct);
+    }
+    if(isCorrect) benar++; else salah++;
+  });
+
+  const total = questions.length;
+  const benarPct = (benar / total) * 100;
+  const salahPct = (salah / total) * 100;
+
+  document.getElementById('seg-correct').setAttribute('stroke-dasharray', `${benarPct} ${100 - benarPct}`);
+  const wrongSeg = document.getElementById('seg-wrong');
+  wrongSeg.setAttribute('stroke-dasharray', `${salahPct} ${100 - salahPct}`);
+  wrongSeg.setAttribute('stroke-dashoffset', `${-benarPct}`);
+
+  document.getElementById('stat-benar').textContent = benar;
+  document.getElementById('stat-salah').textContent = salah;
+  document.getElementById('stat-kosong').textContent = kosong;
+
+  const pct = Math.round((benar / total) * 100);
+  document.getElementById('pct-display').innerHTML = pct + '<span style="font-size:11px">%</span>';
+
+  const checked = state.checked.filter(c=>c).length;
+  document.getElementById('progress-fill').style.width = ((checked/total)*100) + '%';
+
+  document.getElementById('sum-benar').textContent = benar;
+  document.getElementById('sum-salah').textContent = salah;
+  document.getElementById('sum-score').textContent = Math.round((benar/total)*100);
+
+  const banner = document.getElementById('summary-banner');
+  if(checked > 0){
+    banner.classList.add('show');
+    if(checked === total){
+      if(benar === total){
+        document.getElementById('summary-title').textContent = 'Luar biasa! Semua benar! 🎉';
+        document.getElementById('summary-msg').textContent = 'Kamu menguasai sifat bangun datar dengan sempurna. Pertahankan!';
+      } else {
+        document.getElementById('summary-title').textContent = `Selesai! Skor ${Math.round((benar/total)*100)}/100`;
+        document.getElementById('summary-msg').textContent = `Kamu menjawab ${benar} dari ${total} soal dengan benar. Pelajari kembali pembahasan soal yang salah.`;
+      }
+    } else {
+      document.getElementById('summary-title').textContent = `Sedang berjalan... ${checked}/${total} soal`;
+      document.getElementById('summary-msg').textContent = `Kamu sudah mengecek ${checked} soal. Lanjutkan ke soal berikutnya!`;
+    }
+  }
+}
+
+/* ===================================================================
+   CANVAS DRAWING — KANVAS HITUNG (FIXED SCROLL & DPR)
+   =================================================================== */
+const drawer = document.getElementById('calc-drawer');
+const overlay = document.getElementById('calc-overlay');
+const openBtn = document.getElementById('open-canvas');
+const closeBtn = document.getElementById('calc-close');
+
+openBtn.addEventListener('click', ()=>{
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  setTimeout(initCanvasIfNeeded, 400); 
+});
+function closeDrawer(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('show');
+}
+closeBtn.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+const canvas = document.getElementById('calc-canvas');
+const ctx = canvas.getContext('2d');
+let canvasInited = false;
+let drawing = false;
+let lastX = 0, lastY = 0;
+let currentColor = '#1E1810';
+let currentSize = 3.5;
+const dpr = window.devicePixelRatio || 1;
+
+function initCanvasIfNeeded(){
+  if(canvasInited) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 3000 * dpr;
+  
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  
+  canvasInited = true;
+  drawGuideLines();
+}
+
+function drawGuideLines(){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(31,24,16,0.06)';
+  ctx.lineWidth = 1 * dpr;
+  for(let y = 40 * dpr; y < 3000 * dpr; y += 32 * dpr){
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+}
+
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: (clientX - rect.left) * dpr,
+    y: (clientY - rect.top) * dpr
+  };
+}
+
+function startDraw(e){
+  if(e.button !== undefined && e.button !== 0) return; 
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  lastX = p.x; lastY = p.y;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, (currentSize * dpr) / 2, 0, Math.PI*2);
+  ctx.fillStyle = currentColor;
+  ctx.fill();
+}
+function draw(e){
+  if(!drawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+}
+function endDraw(){ drawing = false; }
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('touchstart', startDraw, {passive:false});
+document.addEventListener('mousemove', draw);
+document.addEventListener('mouseup', endDraw);
+document.addEventListener('touchmove', draw, {passive:false});
+document.addEventListener('touchend', endDraw);
+document.addEventListener('touchcancel', endDraw);
+
+document.querySelectorAll('.color-swatch').forEach(s=>{
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');
+    currentColor = s.dataset.color;
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+  });
+});
+
+document.querySelectorAll('.size-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentSize = parseFloat(b.dataset.size);
+    ctx.lineWidth = currentSize * dpr;
+  });
+});
+
+document.getElementById('tool-clear').addEventListener('click', ()=>{
+  if(confirm('Hapus semua tulisan di kanvas?')){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    showToast('Kanvas sudah dibersihkan');
+  }
+});
+
+document.getElementById('tool-pdf').addEventListener('click', async ()=>{
+  showToast('Menyiapkan PDF...');
+  try{
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+    const pageW = 210, pageH = 297, margin = 10;
+    const imgW = pageW - 2*margin;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    let heightLeft = imgH;
+    let position = margin;
+    
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+    heightLeft -= (pageH - 2*margin);
+    
+    while(heightLeft > 0){
+      position = margin - (imgH - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+      heightLeft -= (pageH - 2*margin);
+    }
+    
+    pdf.save('catatan-perhitungan-bangun-datar.pdf');
+    showToast('PDF berhasil disimpan!');
+  }catch(err){
+    showToast('Gagal menyimpan PDF: ' + err.message);
+  }
+});
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+updateScore();
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+});
+</script>
+</body>
+</html>
