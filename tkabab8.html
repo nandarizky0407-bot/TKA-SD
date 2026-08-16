@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan TKA — Bab 8 Bangun Ruang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FAF5EC; --bg-warm:#F2E8D5; --card:#FFFFFF;
+  --ink:#1E1810; --ink-soft:#5A5043; --muted:#9C9181; --line:#E7DCC6;
+  --accent:#C84B31; --accent-deep:#9B3522; --accent-soft:#FBDDD3;
+  --gold:#E8A53D; --gold-soft:#FCEBC5;
+  --success:#2D7D5F; --success-soft:#D6EBDF;
+  --error:#D9544E; --error-soft:#F8D9D6;
+  --pending:#B5A99A; --pending-soft:#EFE7D6;
+  --info:#2563A6; --info-soft:#DCE8F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(200,75,49,.08), transparent 35%),
+    radial-gradient(circle at 92% 95%, rgba(232,165,61,.1), transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(45,125,95,.04), transparent 60%);
+}
+body::after{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4;
+  background-image:radial-gradient(var(--ink) 0.5px, transparent 0.5px);
+  background-size:22px 22px; opacity:.04;
+}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(250,245,236,.85);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.header-inner{
+  max-width:1280px; margin:0 auto; padding:18px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:14px}
+.brand-logo{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  color:#fff; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+  transform:rotate(-5deg); box-shadow:0 6px 18px rgba(200,75,49,.35);
+}
+.brand-text h1{
+  font-family:'Fraunces',serif; font-size:22px; font-weight:900;
+  letter-spacing:-.02em; line-height:1.1;
+}
+.brand-text p{font-size:12.5px; color:var(--ink-soft); margin-top:2px}
+
+.score-panel{
+  display:flex; align-items:center; gap:18px;
+  padding:8px 8px 8px 20px;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:100px; box-shadow:0 6px 20px rgba(31,24,16,.05);
+}
+.donut-wrap{position:relative; width:62px; height:62px}
+.donut svg{transform:rotate(-90deg); width:100%; height:100%}
+.donut circle{transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)}
+.donut-center{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900;
+}
+.donut-center .pct{font-size:17px; line-height:1}
+
+.score-stats{display:flex; gap:14px; font-size:13px; font-weight:600}
+.score-stat{display:flex; align-items:center; gap:6px}
+.dot{width:9px; height:9px; border-radius:50%}
+.dot.benar{background:var(--success)}
+.dot.salah{background:var(--error)}
+.dot.kosong{background:var(--pending)}
+.score-stat span.num{font-family:'Fraunces',serif; font-size:16px; font-weight:800}
+
+.btn-canvas, .btn-nav{
+  background:var(--ink); color:#fff; border:none;
+  padding:11px 20px; border-radius:100px;
+  font-weight:700; font-size:13.5px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:all .25s; font-family:inherit;
+}
+.btn-canvas:hover, .btn-nav:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 8px 20px rgba(200,75,49,.35)}
+.btn-canvas svg, .btn-nav svg{width:16px; height:16px}
+
+.progress-bar{height:4px; background:var(--bg-warm); position:relative; overflow:hidden}
+.progress-fill{
+  position:absolute; inset:0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  transition:width .5s ease;
+}
+
+/* ============ MAIN LAYOUT ============ */
+main{max-width:1100px; margin:0 auto; padding:36px 24px 80px}
+.intro{text-align:center; margin-bottom:42px}
+.intro .eyebrow{
+  display:inline-block; font-size:11.5px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); padding:6px 14px;
+  background:var(--accent-soft); border-radius:100px; margin-bottom:14px;
+}
+.intro h2{
+  font-family:'Fraunces',serif;
+  font-size:clamp(32px,5vw,52px); font-weight:900;
+  letter-spacing:-.025em; line-height:1.05; margin-bottom:14px;
+}
+.intro h2 em{font-style:italic; color:var(--accent)}
+.intro p{color:var(--ink-soft); max-width:620px; margin:0 auto; font-size:15px}
+
+/* ============ MATERI / SLIDE 1 ============ */
+.materi-section{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:24px; padding:40px; margin-bottom:48px;
+  box-shadow:0 4px 20px rgba(31,24,16,.04);
+}
+.materi-header{
+  text-align:center; margin-bottom:32px;
+  padding-bottom:24px; border-bottom:2px dashed var(--line);
+}
+.materi-header h3{
+  font-family:'Fraunces',serif; font-size:32px; font-weight:900;
+  margin-bottom:8px;
+}
+.materi-header p{color:var(--ink-soft); font-size:15px}
+
+.materi-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:24px; margin-bottom:24px;
+}
+@media (max-width:780px){.materi-grid{grid-template-columns:1fr}}
+
+.materi-card{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:18px; padding:24px;
+}
+.materi-card.full{grid-column:1 / -1}
+.materi-card h4{
+  font-family:'Fraunces',serif; font-size:20px; font-weight:800;
+  margin-bottom:12px; color:var(--accent-deep);
+  display:flex; align-items:center; gap:10px;
+}
+.materi-card h4 .icon{
+  width:32px; height:32px; border-radius:10px;
+  background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; font-size:18px;
+}
+.materi-card p{font-size:14.5px; margin-bottom:10px; color:var(--ink-soft)}
+.materi-card strong{color:var(--ink)}
+.materi-card ul{list-style:none; padding-left:8px}
+.materi-card ul li{
+  position:relative; padding-left:20px; margin-bottom:8px;
+  font-size:14.5px; color:var(--ink-soft);
+}
+.materi-card ul li::before{
+  content:''; position:absolute; left:0; top:9px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+}
+
+.shape-box{
+  display:flex; gap:16px; align-items:flex-start;
+  background:#fff; padding:14px; border-radius:12px;
+  margin-bottom:10px; border:1px solid var(--line);
+}
+.shape-icon{
+  width:60px; height:60px; flex-shrink:0;
+  background:var(--bg-warm); border-radius:8px;
+  display:grid; place-items:center;
+  color:var(--accent-deep);
+}
+.shape-icon svg{width:40px; height:40px}
+.shape-text p{margin:0}
+
+/* ============ QUESTION CARD ============ */
+.q-card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:22px; padding:28px 30px; margin-bottom:22px;
+  box-shadow:0 2px 10px rgba(31,24,16,.03);
+  transition:border-color .3s, box-shadow .3s;
+  position:relative; overflow:hidden;
+  opacity:0; transform:translateY(20px);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{opacity:1; transform:translateY(0)}}
+.q-card:hover{box-shadow:0 8px 30px rgba(31,24,16,.07)}
+.q-card.is-correct{border-color:rgba(45,125,95,.4)}
+.q-card.is-wrong{border-color:rgba(217,84,78,.4)}
+
+.q-card::before{
+  content:''; position:absolute; top:0; left:0; width:5px; height:100%;
+  background:var(--bg-warm); transition:background .3s;
+}
+.q-card.is-correct::before{background:var(--success)}
+.q-card.is-wrong::before{background:var(--error)}
+.q-card.is-answered::before{background:var(--accent)}
+
+.q-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; margin-bottom:18px;
+}
+.q-num-block{display:flex; align-items:center; gap:14px}
+.q-num{
+  font-family:'Fraunces',serif; font-weight:900; font-size:34px;
+  color:var(--accent); line-height:1; min-width:50px;
+}
+.q-card.is-correct .q-num{color:var(--success)}
+.q-card.is-wrong .q-num{color:var(--error)}
+.q-tag{
+  font-size:10.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 11px; border-radius:100px;
+  background:var(--bg-warm); color:var(--ink-soft);
+}
+.q-tag.hots{
+  background:linear-gradient(135deg,var(--gold),#D8902A);
+  color:#fff;
+}
+
+.q-status-pill{
+  font-size:11.5px; font-weight:700; padding:5px 12px;
+  border-radius:100px; background:var(--bg-warm); color:var(--muted);
+  letter-spacing:.05em;
+}
+.q-status-pill.benar{background:var(--success-soft); color:var(--success)}
+.q-status-pill.salah{background:var(--error-soft); color:var(--error)}
+
+.q-body{font-size:15.5px; margin-bottom:20px; color:var(--ink)}
+.q-body p{margin-bottom:6px}
+.q-body strong{font-weight:700}
+
+.context-box{
+  background:var(--bg-warm); border-radius:14px;
+  padding:14px 18px; margin-bottom:14px;
+  border-left:3px solid var(--gold);
+  font-size:14.5px;
+}
+
+/* ============ OPTIONS ============ */
+.options{display:grid; gap:10px; margin-top:8px}
+.opt{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 18px; background:var(--bg);
+  border:2px solid var(--line); border-radius:13px;
+  cursor:pointer; transition:all .2s; font-size:15px;
+  user-select:none;
+}
+.opt:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateX(2px)}
+.opt.selected{border-color:var(--accent); background:var(--accent-soft)}
+.opt.correct{border-color:var(--success); background:var(--success-soft)}
+.opt.wrong{border-color:var(--error); background:var(--error-soft)}
+.opt-mark{
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid var(--line); background:#fff;
+  display:grid; place-items:center; flex-shrink:0;
+  font-weight:700; font-size:12px; color:var(--ink-soft);
+  transition:all .2s;
+}
+.opt.selected .opt-mark{background:var(--accent); border-color:var(--accent); color:#fff}
+.opt.correct .opt-mark{background:var(--success); border-color:var(--success); color:#fff}
+.opt.wrong .opt-mark{background:var(--error); border-color:var(--error); color:#fff}
+.opt-text{flex:1}
+.opt-label{font-weight:700; color:var(--accent); margin-right:6px}
+.opt-svg{width:100%; max-width:120px; height:80px; margin: 5px auto;}
+.opt-svg img{width:100%; height:100%; object-fit:contain;}
+
+/* ============ SUB ITEMS (BENAR/SALAH) - LAYOUT MEMANJANG KESAMPING ============ */
+.sub-item{
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px;
+  margin:10px 0;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap; /* Untuk tetap rapi di layar kecil */
+}
+.sub-content{
+  flex: 1;
+  min-width: 200px;
+  font-size:15px;
+  padding:10px 14px;
+  background:#fff;
+  border-radius:8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+}
+.sub-content .text {
+  flex: 1;
+}
+.sub-svg{
+  width: 50px;
+  height: 50px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sub-svg img, .sub-svg svg {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+.bs-buttons{
+  display:flex;
+  gap:8px;
+  flex-shrink: 0;
+}
+.bs-btn{
+  padding:9px 16px;
+  border:2px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13.5px;
+  color:var(--ink-soft);
+  transition:all .2s;
+  font-family:inherit;
+  min-width: 80px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.bs-btn:hover{border-color:var(--accent); color:var(--accent)}
+.bs-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.bs-btn.correct{border-color:var(--success); background:var(--success-soft); color:var(--success)}
+.bs-btn.wrong{border-color:var(--error); background:var(--error-soft); color:var(--error)}
+
+.q-actions{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+.btn{
+  padding:11px 20px; border-radius:11px;
+  font-weight:700; font-size:13.5px;
+  border:2px solid transparent; cursor:pointer;
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn-check{background:var(--ink); color:#fff}
+.btn-check:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 6px 16px rgba(200,75,49,.3)}
+.btn-check:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none}
+.btn-reset{background:transparent; color:var(--ink-soft); border-color:var(--line)}
+.btn-reset:hover{background:var(--bg-warm); color:var(--ink)}
+
+.explanation{
+  margin-top:16px; padding:18px 20px;
+  background:linear-gradient(135deg,rgba(232,165,61,.1),rgba(200,75,49,.06));
+  border-radius:14px; border-left:4px solid var(--gold);
+  font-size:14.5px; max-height:0; overflow:hidden;
+  opacity:0; transition:all .4s ease;
+  padding-top:0; padding-bottom:0; margin-top:0;
+}
+.explanation.show{
+  max-height:1000px; opacity:1;
+  padding:18px 20px; margin-top:16px;
+}
+.exp-head{
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  font-family:'Fraunces',serif; font-weight:800; font-size:16px;
+  color:var(--accent-deep);
+}
+.exp-body p{margin-bottom:8px}
+.exp-body p:last-child{margin-bottom:0}
+.exp-body .work{
+  background:#fff; padding:10px 14px; border-radius:8px;
+  display:inline-block; margin:6px 0; font-size:14px;
+  border:1px solid var(--line);
+}
+
+/* ============ CALC DRAWER ============ */
+.calc-overlay{
+  position:fixed; inset:0; background:rgba(31,24,16,.4);
+  z-index:900; opacity:0; pointer-events:none;
+  transition:opacity .3s; backdrop-filter:blur(2px);
+}
+.calc-overlay.show{opacity:1; pointer-events:auto}
+
+.calc-drawer{
+  position:fixed; top:0; right:0; height:100vh;
+  width:min(500px,100%); background:#fff; z-index:1000;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+  box-shadow:-20px 0 50px rgba(0,0,0,.15);
+}
+.calc-drawer.open{transform:translateX(0)}
+
+.calc-head{
+  padding:18px 22px; background:var(--ink); color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.calc-head h3{
+  font-family:'Fraunces',serif; font-size:19px; font-weight:800;
+  display:flex; align-items:center; gap:10px;
+}
+.calc-head .subtitle{font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px}
+.calc-close{
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(255,255,255,.1); border:none; color:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:background .2s;
+}
+.calc-close:hover{background:rgba(255,255,255,.2)}
+
+.calc-tools{
+  padding:12px 16px; background:var(--bg-warm);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.tool-btn{
+  padding:7px 13px; background:#fff;
+  border:1px solid var(--line); border-radius:9px;
+  cursor:pointer; font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all .15s; color:var(--ink); font-family:inherit;
+}
+.tool-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+.tool-btn svg{width:14px; height:14px}
+.tool-btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.tool-btn.primary:hover{background:var(--accent-deep)}
+.tool-divider{width:1px; height:24px; background:var(--line); margin:0 4px}
+
+.color-group{display:flex; gap:5px; align-items:center}
+.color-swatch{
+  width:22px; height:22px; border-radius:50%;
+  border:2px solid #fff; box-shadow:0 0 0 1px var(--line);
+  cursor:pointer; transition:transform .15s;
+}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{box-shadow:0 0 0 2px var(--accent); transform:scale(1.15)}
+
+.size-group{display:flex; gap:5px; align-items:center}
+.size-btn{
+  width:26px; height:26px; border-radius:8px;
+  border:1px solid var(--line); background:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:all .15s;
+}
+.size-btn.active{background:var(--ink); border-color:var(--ink)}
+.size-btn .dot-sm{width:4px; height:4px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-md{width:7px; height:7px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-lg{width:10px; height:10px; border-radius:50%; background:var(--ink)}
+.size-btn.active .dot-sm, .size-btn.active .dot-md, .size-btn.active .dot-lg{background:#fff}
+
+.calc-area{
+  flex:1; overflow-y:auto; background:#fff;
+  position:relative; padding:0;
+}
+.calc-area::-webkit-scrollbar{width:10px}
+.calc-area::-webkit-scrollbar-track{background:var(--bg-warm)}
+.calc-area::-webkit-scrollbar-thumb{background:var(--muted); border-radius:5px}
+
+.calc-canvas-wrap{
+  position:relative; width:100%;
+  background:#fff;
+  background-image:
+    linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+.calc-canvas-wrap canvas{
+  display:block; width:100%; height:3000px;
+  touch-action:none; cursor:crosshair;
+}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(120px);
+  background:var(--ink); color:#fff;
+  padding:13px 24px; border-radius:100px;
+  font-size:14px; font-weight:600; z-index:2000;
+  opacity:0; transition:all .35s;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  display:flex; align-items:center; gap:10px;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast .toast-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--gold);
+}
+
+/* ============ SUMMARY ============ */
+.summary-banner{
+  margin-top:32px; padding:28px 32px;
+  background:linear-gradient(135deg,var(--ink),#3a2f1f);
+  color:#fff; border-radius:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:24px; flex-wrap:wrap;
+  opacity:0; transform:translateY(20px);
+  transition:all .5s;
+}
+.summary-banner.show{opacity:1; transform:translateY(0)}
+.summary-banner h3{
+  font-family:'Fraunces',serif; font-size:24px;
+  font-weight:900; margin-bottom:6px;
+}
+.summary-banner p{font-size:14px; opacity:.8}
+.summary-stats{display:flex; gap:24px}
+.summary-stat{text-align:center}
+.summary-stat .num{
+  font-family:'Fraunces',serif; font-size:36px; font-weight:900;
+  line-height:1; color:var(--gold);
+}
+.summary-stat .lbl{font-size:11px; opacity:.7; margin-top:4px; letter-spacing:.1em; text-transform:uppercase}
+
+footer{
+  text-align:center; padding:24px;
+  color:var(--ink-soft); font-size:13px;
+  border-top:1px solid var(--line); margin-top:40px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:780px){
+  .header-inner{flex-direction:column; align-items:stretch; padding:14px 18px}
+  .brand{justify-content:flex-start}
+  .score-panel{justify-content:space-between; flex-wrap:wrap; padding:10px 14px}
+  .score-stats{flex:1; justify-content:space-around; font-size:11.5px}
+  .btn-canvas, .btn-nav{width:100%; justify-content:center}
+  .q-card{padding:22px 20px}
+  .q-num{font-size:28px; min-width:42px}
+  .intro h2{font-size:30px}
+  .materi-section{padding:24px 20px}
+  .calc-drawer{width:100%}
+  .calc-tools{padding:10px}
+}
+@media (max-width:480px){
+  .q-head{flex-direction:column; gap:8px}
+  .summary-stats{gap:14px}
+  .summary-stat .num{font-size:28px}
+}
+
+/* ============ MATCHING (PENJODOHAN) ============ */
+.match-container {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.match-col {
+  flex: 1;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.match-item {
+  background: #fff;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all .2s;
+}
+.match-item:hover {
+  border-color: var(--accent);
+}
+.match-item.selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.match-item.matched-correct {
+  border-color: var(--success);
+  background: var(--success-soft);
+  pointer-events: none;
+}
+.match-item.matched-wrong {
+  border-color: var(--error);
+  background: var(--error-soft);
+  animation: shake 0.4s;
+}
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+.match-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-warm);
+  color: var(--ink);
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.match-item.selected .match-num {
+  background: var(--accent);
+  color: #fff;
+}
+.match-item.matched-correct .match-num {
+  background: var(--success);
+  color: #fff;
+}
+.match-item.matched-wrong .match-num {
+  background: var(--error);
+  color: #fff;
+}
+.match-content {
+  flex: 1;
+  font-size: 14.5px;
+  line-height: 1.4;
+}
+.match-content img {
+  max-width: 60px;
+  height: 50px;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+}
+.match-pair-val {
+  display: none;
+}
+
+/* ============ SVG STYLES ============ */
+.svg-fill { fill: #FAF5EC; stroke: #1E1810; stroke-width: 2; stroke-linejoin: round; }
+.svg-fill-2 { fill: #F2E8D5; stroke: #1E1810; stroke-width: 2; stroke-linejoin: round; }
+.svg-line { fill: none; stroke: #1E1810; stroke-width: 2; stroke-linejoin: round; stroke-dasharray: 4 2; }
+.svg-text { font-family: 'Fraunces', serif; font-weight: 700; font-size: 12px; fill: #1E1810; }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">8</div>
+      <div class="brand-text">
+        <h1>Latihan TKA — Bab 8</h1>
+        <p>Konstruksi Bangun Ruang</p>
+      </div>
+    </div>
+    <div class="score-panel">
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EFE7D6" stroke-width="5"/>
+            <circle id="seg-correct" cx="18" cy="18" r="15.9" fill="none" stroke="#2D7D5F" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+            <circle id="seg-wrong" cx="18" cy="18" r="15.9" fill="none" stroke="#D9544E" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="donut-center">
+          <div class="pct" id="pct-display">0<span style="font-size:11px">%</span></div>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat"><span class="dot benar"></span><span class="num" id="stat-benar">0</span><span>Benar</span></div>
+        <div class="score-stat"><span class="dot salah"></span><span class="num" id="stat-salah">0</span><span>Salah</span></div>
+        <div class="score-stat"><span class="dot kosong"></span><span class="num" id="stat-kosong">30</span><span>Belum</span></div>
+      </div>
+      <button class="btn-canvas" id="open-canvas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Kanvas Hitung
+      </button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<main>
+  <!-- ============ SLIDE 1: RANGKUMAN MATERI ============ -->
+  <section class="materi-section" id="materi">
+    <div class="materi-header">
+      <span class="eyebrow" style="background:var(--gold-soft); color:var(--accent-deep)">Rangkuman Materi</span>
+      <h3>Prisma, Limas, & Jaring-jaring</h3>
+      <p>Pahami konsep dasar bangun ruang sebelum mengerjakan soal latihan.</p>
+    </div>
+
+    <div class="materi-grid">
+      <div class="materi-card">
+        <h4><span class="icon">▲</span> Prisma</h4>
+        <p>Prisma adalah bangun ruang yang memiliki sisi alas dan sisi atas yang bentuknya sama, sebangun, dan saling berhadapan. Sisi-sisi tegaknya berbentuk persegi atau persegi panjang.</p>
+        <ul>
+          <li><strong>Kubus:</strong> Prisma segi empat dengan keempat rusuk tegak sama panjang (alas persegi).</li>
+          <li><strong>Balok:</strong> Prisma segi empat dengan rusuk tegak tidak sama panjang (alas persegi panjang).</li>
+          <li><strong>Tabung:</strong> Prisma dengan alas berbentuk lingkaran (memiliki sisi lengkung).</li>
+        </ul>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">▽</span> Limas</h4>
+        <p>Limas adalah bangun ruang yang memiliki sisi alas berbentuk segi banyak, dan sisi tegak berbentuk segitiga yang bertemu pada satu titik puncak (apex).</p>
+        <ul>
+          <li><strong>Limas Segiempat:</strong> Alas berbentuk persegi atau persegi panjang.</li>
+          <li><strong>Kerucut:</strong> Limas dengan alas berbentuk lingkaran. Sisi tegaknya disebut selimut (memiliki sisi lengkung).</li>
+        </ul>
+      </div>
+
+      <div class="materi-card full">
+        <h4><span class="icon">✂</span> Jaring-jaring Bangun Ruang</h4>
+        <p>Jaring-jaring adalah bangun datar yang terbentuk jika sebuah bangun ruang "dipotong" pada beberapa rusuknya dan dibuka (dibentangkan) menjadi bidang datar.</p>
+        <div class="materi-grid" style="margin-top: 20px; margin-bottom: 0;">
+          <div class="shape-box">
+            <div class="shape-icon">
+              <svg viewBox="0 0 100 100">
+                <!-- Jaring Kubus (Cross) -->
+                <rect x="35" y="10" width="30" height="30" class="svg-fill-2"/>
+                <rect x="5" y="40" width="30" height="30" class="svg-fill-2"/>
+                <rect x="35" y="40" width="30" height="30" class="svg-fill-2"/>
+                <rect x="65" y="40" width="30" height="30" class="svg-fill-2"/>
+                <rect x="35" y="70" width="30" height="30" class="svg-fill-2"/>
+              </svg>
+            </div>
+            <div class="shape-text">
+              <strong>Jaring Kubus</strong>
+              <p>Terdiri dari 6 buah persegi yang identik. Jika dilipat, akan membentuk kubus.</p>
+            </div>
+          </div>
+          <div class="shape-box">
+            <div class="shape-icon">
+              <svg viewBox="0 0 100 100">
+                <!-- Jaring Tabung -->
+                <ellipse cx="20" cy="20" rx="10" ry="4" class="svg-fill"/>
+                <rect x="10" y="20" width="20" height="50" class="svg-fill-2"/>
+                <path d="M 10,70 A 10 4 0 0 0 30 70" class="svg-fill"/>
+                <path d="M 40,15 A 10 4 0 0 0 60 15 L 60,85 A 10 4 0 0 1 40 85 Z" class="svg-fill-2"/>
+              </svg>
+            </div>
+            <div class="shape-text">
+              <strong>Jaring Tabung</strong>
+              <p>Terdiri dari 2 buah lingkaran (alas & tutup) dan 1 persegi panjang (selimut).</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:32px">
+      <button class="btn-nav" onclick="document.getElementById('latihan').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Mulai Latihan Soal
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: LATIHAN SOAL ============ -->
+  <section id="latihan">
+    <div class="intro">
+      <span class="eyebrow">Bab 8 · Bangun Ruang</span>
+      <h2>Latihan <em>Soal Interaktif</em></h2>
+      <p>30 soal pilihan ganda, benar-salah, kompleks, dan penjodohan. Kerjakan dengan tenang — gunakan kanvas hitung untuk coret-coret. Skor live mengisi lingkaran saat kamu mengecek jawaban.</p>
+    </div>
+    <div id="questions"></div>
+    
+    <div class="summary-banner" id="summary-banner">
+      <div>
+        <h3 id="summary-title">Kerjakan dulu semua soalnya ya!</h3>
+        <p id="summary-msg">Selesaikan 30 soal berikut, lalu lihat hasil akhirnya di sini.</p>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat"><div class="num" id="sum-benar">0</div><div class="lbl">Benar</div></div>
+        <div class="summary-stat"><div class="num" id="sum-salah">0</div><div class="lbl">Salah</div></div>
+        <div class="summary-stat"><div class="num" id="sum-score">0</div><div class="lbl">Skor</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Media Latihan TKA · Bab 8 Bangun Ruang · Dibuat untuk pembelajaran interaktif
+</footer>
+
+<!-- ============ CALC DRAWER ============ -->
+<div class="calc-overlay" id="calc-overlay"></div>
+<aside class="calc-drawer" id="calc-drawer">
+  <div class="calc-head">
+    <div>
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 15h6M9 12h6"/></svg>
+        Kanvas Hitung
+      </h3>
+      <div class="subtitle">Coret perhitunganmu di sini — bisa discroll, bisa di-export PDF</div>
+    </div>
+    <button class="calc-close" id="calc-close" aria-label="Tutup kanvas">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="calc-tools">
+    <div class="color-group">
+      <div class="color-swatch active" style="background:#1E1810" data-color="#1E1810"></div>
+      <div class="color-swatch" style="background:#C84B31" data-color="#C84B31"></div>
+      <div class="color-swatch" style="background:#2D7D5F" data-color="#2D7D5F"></div>
+      <div class="color-swatch" style="background:#2563A6" data-color="#2563A6"></div>
+      <div class="color-swatch" style="background:#E8A53D" data-color="#E8A53D"></div>
+    </div>
+    <div class="tool-divider"></div>
+    <div class="size-group">
+      <button class="size-btn" data-size="2"><span class="dot-sm"></span></button>
+      <button class="size-btn active" data-size="3.5"><span class="dot-md"></span></button>
+      <button class="size-btn" data-size="6"><span class="dot-lg"></span></button>
+    </div>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" id="tool-clear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Hapus
+    </button>
+    <button class="tool-btn primary" id="tool-pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Simpan PDF
+    </button>
+  </div>
+  <div class="calc-area" id="calc-area">
+    <div class="calc-canvas-wrap">
+      <canvas id="calc-canvas"></canvas>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg">Pesan</span></div>
+
+<script>
+/* ===================================================================
+   DATA SOAL — 30 soal (10 dasar + 20 HOTS)
+   =================================================================== */
+
+const cubeImg = '<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwN5p9DDXIxUJQY4jDdzqhnvbXNaaLvjcqbkBYeiaCzaGQWHgX4LPleX4C&s=10" alt="Kubus">';
+
+const svgIcons = {
+  balok: `<svg viewBox="0 0 100 100"><polygon points="10,60 40,20 80,30 50,70" class="svg-fill-2"/><polygon points="10,60 10,80 50,100 50,70" class="svg-fill"/><polygon points="50,70 50,100 80,90 80,30" class="svg-fill-2"/><line x1="10" y1="60" x2="50" y2="70" class="svg-line"/><line x1="50" y1="70" x2="80" y2="30" class="svg-line"/></svg>`,
+  tabung: `<svg viewBox="0 0 100 100"><ellipse cx="50" cy="20" rx="30" ry="10" class="svg-fill-2"/><path d="M 20,20 L 20,70 A 30 10 0 0 0 80 70 L 80,20" class="svg-fill"/><ellipse cx="50" cy="70" rx="30" ry="10" class="svg-line"/></svg>`,
+  prisma: `<svg viewBox="0 0 100 100"><polygon points="50,10 90,80 10,80" class="svg-fill-2"/><line x1="50" y1="10" x2="50" y2="80" class="svg-line"/><polygon points="10,80 50,90 90,80 50,70" class="svg-fill"/></svg>`,
+  limas: `<svg viewBox="0 0 100 100"><polygon points="50,10 90,80 10,80" class="svg-fill"/><line x1="50" y1="10" x2="50" y2="80" class="svg-line"/><polygon points="10,80 50,95 90,80 50,65" class="svg-fill-2"/></svg>`,
+  kerucut: `<svg viewBox="0 0 100 100"><polygon points="50,10 90,70 10,70" class="svg-fill"/><ellipse cx="50" cy="70" rx="40" ry="10" class="svg-line"/><line x1="50" y1="10" x2="10" y2="70" class="svg-line"/></svg>`,
+  bola: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" class="svg-fill"/><ellipse cx="50" cy="50" rx="40" ry="15" class="svg-line"/><ellipse cx="50" cy="50" rx="15" ry="40" class="svg-line"/></svg>`
+};
+
+const jaringKubus1 = `<svg viewBox="0 0 100 100"><rect x="30" y="10" width="30" height="30" class="svg-fill-2"/><rect x="30" y="40" width="30" height="30" class="svg-fill-2"/><rect x="30" y="70" width="30" height="30" class="svg-fill-2"/><rect x="0" y="40" width="30" height="30" class="svg-fill-2"/><rect x="60" y="40" width="30" height="30" class="svg-fill-2"/></svg>`;
+const jaringKubus2 = `<svg viewBox="0 0 100 100"><rect x="10" y="10" width="30" height="30" class="svg-fill-2"/><rect x="40" y="10" width="30" height="30" class="svg-fill-2"/><rect x="70" y="10" width="30" height="30" class="svg-fill-2"/><rect x="40" y="40" width="30" height="30" class="svg-fill-2"/><rect x="40" y="70" width="30" height="30" class="svg-fill-2"/></svg>`;
+const jaringKubusSalah = `<svg viewBox="0 0 100 100"><rect x="10" y="10" width="30" height="30" class="svg-fill-2"/><rect x="40" y="10" width="30" height="30" class="svg-fill-2"/><rect x="10" y="40" width="30" height="30" class="svg-fill-2"/><rect x="40" y="40" width="30" height="30" class="svg-fill-2"/><rect x="70" y="40" width="30" height="30" class="svg-fill-2"/><rect x="10" y="70" width="30" height="30" class="svg-fill-2"/></svg>`;
+
+const jaringPrisma = `<svg viewBox="0 0 100 100"><polygon points="20,80 80,80 50,20" class="svg-fill-2"/><rect x="20" y="80" width="60" height="15" class="svg-fill"/><rect x="20" y="95" width="60" height="15" class="svg-fill-2"/><line x1="20" y1="80" x2="20" y2="110" class="svg-line"/><line x1="80" y1="80" x2="80" y2="110" class="svg-line"/><line x1="50" y1="20" x2="50" y2="80" class="svg-line"/></svg>`;
+
+const questions = [
+  // ============ SOAL 1 (MATCHING) ============
+  {
+    type:'match', tag:'Penjodohan', hots:false,
+    body:`<p>Jodohkan nama bangun ruang dengan deskripsi sifat-sifatnya.</p>`,
+    pairs:[
+      { left: "Kubus", right: "Memiliki 6 sisi berbentuk persegi, 12 rusuk sama panjang, dan 8 titik sudut." },
+      { left: "Tabung", right: "Memiliki 3 sisi (2 lingkaran dan 1 selimut), tidak memiliki titik sudut." },
+      { left: "Limas Segiempat", right: "Memiliki 5 sisi (1 persegi dan 4 segitiga), 5 titik sudut, dan 1 titik puncak." },
+      { left: "Kerucut", right: "Memiliki 2 sisi (1 lingkaran dan 1 selimut segitiga), dan 1 titik puncak." }
+    ],
+    explanation: `Pastikan mengenali ciri-ciri khas setiap bangun ruang, seperti jumlah sisi, bentuk sisi, rusuk, dan titik sudut.`
+  },
+
+  // ============ SOAL 2 (BENAR/SALAH GAMBAR) ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Tentukan apakah bangun ruang berikut termasuk dalam kelompok PRISMA atau bukan.</p>`,
+    items:[
+      { svg: cubeImg, text: "Kubus adalah Prisma.", correct: true, exp: "Kubus adalah prisma segi empat karena memiliki alas dan atas berbentuk segi empat yang sejajar dan identik." },
+      { svg: svgIcons.kerucut, text: "Kerucut adalah Prisma.", correct: false, exp: "Kerucut bukan prisma, melainkan termasuk golongan limas karena memiliki titik puncak." },
+      { svg: svgIcons.tabung, text: "Tabung adalah Prisma.", correct: true, exp: "Tabung adalah prisma dengan alas berbentuk lingkaran." }
+    ]
+  },
+
+  // ============ SOAL 3 (PILIHAN GANDA) ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Aku adalah bangun ruang yang memiliki 5 sisi, 8 rusuk, dan 5 titik sudut. Sisi alasku berbentuk segiempat dan sisi tegakku berbentuk segitiga. Aku adalah...</p>`,
+    options:[
+      {label:'A', text:`Prisma Segitiga`},
+      {label:'B', text:`Limas Segiempat`},
+      {label:'C', text:`Kerucut`},
+      {label:'D', text:`Balok`}
+    ],
+    correct:[1],
+    explanation:`<p>Limas segiempat memiliki 1 sisi alas (persegi) dan 4 sisi tegak (segitiga). Total 5 sisi. Rusuknya 8, dan titik sudutnya 5 (4 di alas, 1 di puncak).</p>`
+  },
+
+  // ============ SOAL 4 (BENAR/SALAH) ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Perhatikan sifat-sifat tabung berikut. Tentukan apakah setiap pernyataan Benar atau Salah.</p>`,
+    items:[
+      { text: "Memiliki 3 sisi (atas, bawah, selimut).", correct: true, exp: "Benar. Tabung memiliki 2 sisi berbentuk lingkaran (atas & bawah) dan 1 sisi lengkung (selimut)." },
+      { text: "Memiliki 2 rusuk lengkung.", correct: true, exp: "Benar. Rusuk tabung adalah garis lengkung pada lingkaran atas dan bawah." },
+      { text: "Tidak memiliki titik sudut.", correct: true, exp: "Benar. Tabung tidak memiliki titik sudut karena sisinya melengkung." }
+    ]
+  },
+
+  // ============ SOAL 5 (PILIHAN GANDA KOMPLEKS) ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah kubus besar berukuran 3x3x3 dicat seluruh permukaannya, kemudian dipotong menjadi 27 kubus satuan.</div>
+      <p>Manakah pernyataan berikut yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Ada 8 kubus yang memiliki 3 sisi tercat.`},
+      {label:'B', text:`Ada 12 kubus yang memiliki 2 sisi tercat.`},
+      {label:'C', text:`Ada 6 kubus yang memiliki 1 sisi tercat.`},
+      {label:'D', text:`Ada 1 kubus yang tidak tercat sama sekali.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Kubus 3x3x3 memiliki:<br>- 8 kubus di sudut (3 sisi tercat).<br>- 12 kubus di tengah rusuk (2 sisi tercat).<br>- 6 kubus di tengah sisi (1 sisi tercat).<br>- 1 kubus di tengah (tidak tercat).<br>Total = 8 + 12 + 6 + 1 = 27 kubus satuan.</p>`
+  },
+
+  // ============ SOAL 6 (PILIHAN GANDA KOMPLEKS GAMBAR) ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Dari jaring-jaring berikut, manakah yang dapat membentuk Prisma Segitiga? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', svg: `<img src="https://imgix3.ruangguru.com/assets/miscellaneous/jpg_e7dccj_8908.JPG" alt="Jaring Prisma 1">`},
+      {label:'B', svg: `<img src="https://imgix2.ruangguru.com/assets/miscellaneous/png_iomqpp_518.PNG" alt="Jaring Prisma 2">`},
+      {label:'C', svg: `<img src="https://imgix2.ruangguru.com/assets/miscellaneous/png_qflwvx_1439.png" alt="Jaring Prisma 3">`},
+      {label:'D', svg: `<img src="https://image.idntimes.com/post/20240628/3eff2c9cc67483ae1e76431abd5b6b04-3a2c45a5e6c0870d54f79516592c0b15-902fe091d4a5f646853db0ebccb2ce07.jpg" alt="Jaring Prisma 4">`}
+    ],
+    correct:[0],
+    explanation:`<p>Jaring-jaring prisma segitiga terdiri dari 2 buah segitiga (sama besar) sebagai alas dan tutup, serta 3 buah persegi panjang sebagai sisi tegak. Hanya jaring A yang memenuhi.</p>`
+  },
+
+  // ============ SOAL 7 (PILIHAN GANDA KOMPLEKS GAMBAR) ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<p>Manakah di antara bangun berikut yang memiliki sisi lengkung? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', svg: svgIcons.bola},
+      {label:'B', svg: cubeImg},
+      {label:'C', svg: svgIcons.tabung},
+      {label:'D', svg: svgIcons.kerucut}
+    ],
+    correct:[0,2,3],
+    explanation:`<p>Bola, tabung, dan kerucut adalah bangun ruang lengkung (bukan polyhedron). Kubus seluruh sisinya rata (persegi).</p>`
+  },
+
+  // ============ SOAL 8 (PILIHAN GANDA) ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Untuk membuat sebuah kotak kado berbentuk kubus, kertas yang dibutuhkan untuk melapisi seluruh permukaannya disebut...</p>`,
+    options:[
+      {label:'A', text:`Luas Permukaan`},
+      {label:'B', text:`Volume`},
+      {label:'C', text:`Keliling`},
+      {label:'D', text:`Diagonal Ruang`}
+    ],
+    correct:[0],
+    explanation:`<p>Luas permukaan adalah total luas semua sisi bangun ruang yang menutupinya. Untuk kubus, terdiri dari 6 luas persegi.</p>`
+  },
+
+  // ============ SOAL 9 (MATCHING GAMBAR) ============
+  {
+    type:'match', tag:'Penjodohan', hots:false,
+    body:`<p>Jodohkan nama bangun ruang di sebelah kiri dengan jaring-jaringnya yang tepat di sebelah kanan.</p>`,
+    pairs:[
+      { left: "Kubus", right_svg: `<img src="https://www2.erlangga.co.id/images/stories/kubus.JPG" alt="Jaring Kubus">` },
+      { left: "Tabung", right_svg: `<img src="https://imgix2.ruangguru.com/assets/miscellaneous/jpg_exyemh_2345.jpg" alt="Jaring Tabung">` },
+      { left: "Limas Segiempat", right_svg: `<img src="https://roboguru-forum-cdn.ruangguru.com/cec3ba75-466f-4d36-b2d2-f43f6edec96b.jpg?convert=png" alt="Jaring Limas Segiempat">` }
+    ],
+    explanation: `Setiap bangun ruang memiliki jaring-jaring yang khas sesuai dengan bentuk sisi-sisinya.`
+  },
+
+  // ============ SOAL 10 (BENAR/SALAH GAMBAR JARING) ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Perhatikan gambar jaring-jaring berikut. Tentukan apakah setiap jaring-jaring dapat membentuk sebuah kubus.</p>`,
+    items:[
+      { svg: jaringKubus1, text: "Jaring 1 dapat membentuk kubus.", correct: false, exp: "Jaring berbentuk silang (cross) ini adalah salah satu jaring kubus yang valid." },
+      { svg: jaringKubusSalah, text: "Jaring 2 dapat membentuk kubus.", correct: false, exp: "Jaring ini memiliki 6 persegi, namun susunannya tidak akan bisa bertemu membentuk kubus karena posisinya yang berurutan berlebih." },
+      { svg: jaringKubus2, text: "Jaring 3 dapat membentuk kubus.", correct: true, exp: "Susunan T-terbalik ini juga merupakan jaring kubus yang valid." }
+    ]
+  },
+
+  // ============ SOAL 11 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah bangun ruang memiliki 7 sisi, 15 rusuk, dan 10 titik sudut. Bangun ruang tersebut adalah...</p>`,
+    options:[
+      {label:'A', text:`Prisma Segilima`},
+      {label:'B', text:`Limas Segitujuh`},
+      {label:'C', text:`Prisma Segienam`},
+      {label:'D', text:`Limas Segiembat`}
+    ],
+    correct:[0],
+    explanation:`<p>Rumus Prisma (n = jumlah sisi alas): Sisi = n+2, Rusuk = 3n, Titik Sudut = 2n.<br>Untuk Prisma Segilima (n=5): Sisi = 5+2=7, Rusuk = 15, Titik = 10. Sesuai dengan soal.</p>`
+  },
+
+  // ============ SOAL 12 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah bangun ruang berikut yang memiliki TITIK PUNCAK? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text: 'Limas'},
+      {label:'B', text: 'Prisma'},
+      {label:'C', text: 'Kerucut'},
+      {label:'D', text: 'Tabung'}
+    ],
+    correct:[0,2],
+    explanation:`<p>Hanya limas dan kerucut yang memiliki titik puncak (apex). Prisma dan tabung memiliki tutup yang sejajar dengan alas, bukan titik.</p>`
+  },
+
+  // ============ SOAL 13 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Evaluasi pernyataan berikut tentang jaring-jaring balok.</div>`,
+    items:[
+      { text: "Jaring-jaring balok selalu terdiri dari 6 persegi panjang.", correct: false, exp: "Salah. Jaring-jaring balok bisa terdiri dari 6 persegi panjang, namun bisa juga memiliki 2 persegi dan 4 persegi panjang (tergantung ukurannya)." },
+      { text: "Setiap pasangan sisi yang berhadapan pada jaring balok memiliki ukuran yang sama.", correct: true, exp: "Benar. Sisi-sisi yang berhadapan pada balok selalu kongruen." },
+      { text: "Sebuah balok hanya memiliki 1 macam jaring-jaring yang benar.", correct: false, exp: "Salah. Ada 54 macam jaring-jaring balok yang berbeda." }
+    ]
+  },
+
+  // ============ SOAL 14 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah limas memiliki 12 rusuk. Maka, sisi alas limas tersebut berbentuk...</p>`,
+    options:[
+      {label:'A', text:`Segitiga`},
+      {label:'B', text:`Persegi`},
+      {label:'C', text:`Segilima`},
+      {label:'D', text:`Segienam`}
+    ],
+    correct:[3],
+    explanation:`<p>Rumus rusuk limas = n (alas) + n (sisi tegak) = 2n.<br>2n = 12 -> n = 6. Jadi, alasnya segi-enam.</p>`
+  },
+
+  // ============ SOAL 15 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Diketahui sebuah bangun ruang memiliki sisi alas berbentuk lingkaran.</div>`,
+    options:[
+      {label:'A', text:`Bangun ruang tersebut pasti Tabung.`},
+      {label:'B', text:`Jika bangun tersebut tidak memiliki titik sudut, bangun tersebut adalah Tabung.`},
+      {label:'C', text:`Jika bangun tersebut memiliki 1 titik sudut, bangun tersebut adalah Kerucut.`},
+      {label:'D', text:`Jika bangun tersebut memiliki sisi tegak berbentuk selimut, bangun tersebut bisa Tabung atau Kerucut.`}
+    ],
+    correct:[1,2,3],
+    explanation:`<p>A salah karena bisa jadi kerucut. B benar (tabung tidak punya titik sudut). C benar (kerucut punya 1 titik puncak). D benar (tabung dan kerucut keduanya memiliki selimut sebagai sisi lengkung).</p>`
+  },
+
+  // ============ SOAL 16 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Perhatikan sebuah kubus yang dipotong diagonal ruangnya (dari 1 titik sudut ke titik sudut berhadapan).</div>`,
+    items:[
+      { text: "Potongan tersebut menghasilkan 2 buah limas segiempat.", correct: true, exp: "Benar. Potongan diagonal ruang membagi kubus menjadi 2 limas segiempat identik." },
+      { text: "Kedua limas yang terbentuk memiliki volume yang sama.", correct: true, exp: "Benar. Karena kubus dibagi tepat dua sama besar." },
+      { text: "Alas limas yang terbentuk berbentuk segitiga.", correct: false, exp: "Salah. Alas limas tersebut adalah sisi kubus itu sendiri, yang berbentuk persegi." }
+    ]
+  },
+
+  // ============ SOAL 17 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah prisma memiliki 12 titik sudut. Jika alasnya berbentuk segi-n, maka nilai n adalah...</p>`,
+    options:[
+      {label:'A', text:`4`},
+      {label:'B', text:`5`},
+      {label:'C', text:`6`},
+      {label:'D', text:`8`}
+    ],
+    correct:[2],
+    explanation:`<p>Titik sudut prisma = 2n. 2n = 12 -> n = 6. Jadi, alasnya segi-enam.</p>`
+  },
+
+  // ============ SOAL 18 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah bangun ruang berikut yang jumlah sisinya 5? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Limas segiempat`},
+      {label:'B', text:`Prisma segitiga`},
+      {label:'C', text:`Kerucut`},
+      {label:'D', text:`Prisma segiempat (Balok)`}
+    ],
+    correct:[0,1],
+    explanation:`<p>Limas segiempat: 1 alas + 4 sisi tegak = 5.<br>Prisma segitiga: 2 alas segitiga + 3 sisi tegak = 5.<br>Kerucut: 2 sisi (lingkaran + selimut).<br>Prisma segiempat: 6 sisi.</p>`
+  },
+
+  // ============ SOAL 19 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah prisma segitiga siku-siku memiliki panjang sisi alas 3, 4, 5 dan tinggi prisma 10.</div>`,
+    items:[
+      { text: "Jaring-jaring prisma ini memiliki tepat 5 sisi (3 persegi panjang dan 2 segitiga).", correct: true, exp: "Benar. Prisma segitiga selalu memiliki 3 persegi panjang (selimut) dan 2 segitiga (alas & tutup)." },
+      { text: "Volume prisma ini dapat dihitung dengan (Luas Alas × Tinggi Prisma).", correct: true, exp: "Benar. Volume prisma selalu Luas Alas × Tinggi." },
+      { text: "Jika prisma ini dipotong menjadi 2 bagian sama tinggi, terbentuk 2 prisma segitiga baru.", correct: true, exp: "Benar. Memotong prisma tegak sejajar alas akan menghasilkan prisma-prisma baru yang sebangun." }
+    ]
+  },
+
+  // ============ SOAL 20 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah bangun ruang memiliki 1 sisi berbentuk segi-n, dan n sisi berbentuk segitiga.</div>`,
+    options:[
+      {label:'A', text:`Prisma Segi-n`},
+      {label:'B', text:`Limas Segi-n`},
+      {label:'C', text:`Kubus`},
+      {label:'D', text:`Balok`}
+    ],
+    correct:[1],
+    explanation:`<p>Limas segi-n memiliki 1 sisi alas berbentuk segi-n, dan n sisi tegak berbentuk segitiga. Total sisi = n + 1.</p>`
+  },
+
+  // ============ SOAL 21 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah jaring-jaring berikut yang dapat membentuk limas segiempat? <em>(Pilih semua yang benar)</em></p>`,
+    options:[
+      {label:'A', svg: `<img src="https://roboguru-forum-cdn.ruangguru.com/cec3ba75-466f-4d36-b2d2-f43f6edec96b.jpg?convert=png" alt="Jaring Limas 1">`},
+      {label:'B', svg: `<img src="https://www2.erlangga.co.id/images/stories/kubus.JPG" alt="Jaring Limas 2">`},
+      {label:'C', svg: `<img src="https://imgix2.ruangguru.com/assets/miscellaneous/jpg_exyemh_2345.jpg" alt="Jaring Limas 3">`},
+      {label:'D', svg: jaringPrisma}
+    ],
+    correct:[0],
+    explanation:`<p>Jaring limas segiempat terdiri dari 1 buah persegi (alas) dan 4 buah segitiga (sisi tegak). Hanya gambar A yang sesuai.</p>`
+  },
+
+  // ============ SOAL 22 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Evaluasi pernyataan tentang hubungan antar bangun ruang.</div>`,
+    items:[
+      { text: "Semua kubus adalah balok.", correct: true, exp: "Benar. Kubus memenuhi syarat balok (prisma segiempat), hanya saja semua rusuknya sama panjang." },
+      { text: "Semua balok adalah prisma.", correct: true, exp: "Benar. Balok adalah prisma dengan alas persegi panjang." },
+      { text: "Semua kerucut adalah limas.", correct: true, exp: "Benar. Kerucut adalah limas dengan alas lingkaran." },
+      { text: "Semua limas adalah kerucut.", correct: false, exp: "Salah. Limas hanya menjadi kerucut jika alasnya berbentuk lingkaran." }
+    ]
+  },
+
+  // ============ SOAL 23 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah bangun ruang dipotong oleh sebuah bidang sejajar dengan alasnya. Jika bangun ruang asli adalah kerucut, maka potongan atasnya adalah...</p>`,
+    options:[
+      {label:'A', text:`Limas`},
+      {label:'B', text:`Kerucut (lebih kecil)`},
+      {label:'C', text:`Tabung`},
+      {label:'D', text:`Prisma`}
+    ],
+    correct:[1],
+    explanation:`<p>Memotong kerucut dengan bidang sejajar alas akan menghasilkan kerucut yang lebih kecil di bagian atas, dan frustum (kerucut terpancung) di bawah.</p>`
+  },
+
+  // ============ SOAL 24 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Pilih sifat-sifat yang dimiliki oleh Tabung dan Kerucut sekaligus.</div>`,
+    options:[
+      {label:'A', text:`Memiliki sisi alas berbentuk lingkaran`},
+      {label:'B', text:`Memiliki sisi lengkung (selimut)`},
+      {label:'C', text:`Memiliki rusuk lengkung`},
+      {label:'D', text:`Tidak memiliki diagonal ruang`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Tabung dan kerucut keduanya memiliki alas lingkaran, selimut, rusuk lengkung, dan karena tidak memiliki rusuk lurus (polyhedron), mereka tidak memiliki diagonal ruang.</p>`
+  },
+
+  // ============ SOAL 25 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah kubus terbuat dari kawat yang panjangnya 48 cm (ini adalah keliling seluruh rusuknya).</div>`,
+    items:[
+      { text: "Panjang 1 rusuk kubus tersebut adalah 4 cm.", correct: true, exp: "Benar. Kubus memiliki 12 rusuk. 48 / 12 = 4 cm." },
+      { text: "Jika kawat yang sama dibengkokkan menjadi Limas Segiempat, panjang rusuk alasnya pasti 4 cm.", correct: false, exp: "Salah. Limas segiempat memiliki 8 rusuk. Jika semua rusuk sama panjang, 1 rusuk = 48/8 = 6 cm." },
+      { text: "Kubus tersebut dapat dibuat dari 12 batang kawat yang sama panjang.", correct: true, exp: "Benar. Karena semua rusuk kubus sama panjang." }
+    ]
+  },
+
+  // ============ SOAL 26 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah bangun ruang memiliki 8 buah titik sudut. Bangun ruang tersebut adalah...</p>`,
+    options:[
+      {label:'A', text:`Prisma Segitiga`},
+      {label:'B', text:`Limas Segiempat`},
+      {label:'C', text:`Limas Persegi Panjang`},
+      {label:'D', text:`Prisma Segiempat`}
+    ],
+    correct:[3],
+    explanation:`<p>Prisma segitiga punya 6 titik sudut. Limas segiempat punya 5 titik sudut. Prisma segiempat (balok/kubus) punya 8 titik sudut. Jadi, yang BUKAN 5 titik sudut adalah Prisma Segiempat.</p>`
+  },
+
+  // ============ SOAL 27 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<p>Manakah bangun ruang berikut yang apabila dipotong melalui diagonal sisi-sisinya, dapat menghasilkan bangun datar segitiga? <em>(Pilih semua yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Kubus`},
+      {label:'B', text:`Balok`},
+      {label:'C', text:`Prisma Segitiga`},
+      {label:'D', text:`Tabung`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Kubus, balok, dan prisma segitiga adalah bangun polyhedron (sisinya datar). Memotongnya pada sisi tertentu dapat menghasilkan potongan berbentuk segitiga. Tabung memiliki sisi lengkung, jadi potongannya berbentuk elips atau lingkaran, bukan segitiga.</p>`
+  },
+
+  // ============ SOAL 28 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah balok berukuran p x l x t. Jika dipotong pada bidang diagonal ruangnya...</div>`,
+    items:[
+      { text: "Balok tersebut terbagi menjadi 2 limas segiempat.", correct: true, exp: "Benar. Bidang diagonal ruang membelah balok menjadi 2 bangun yang masing-masing memiliki 1 titik puncak (sisi alasnya persegi panjang)." },
+      { text: "Kedua limas yang terbentuk memiliki volume yang sama.", correct: true, exp: "Benar. Karena potongannya tepat di tengah (diagonal)." },
+      { text: "Bidang potongannya berbentuk persegi panjang.", correct: true, exp: "Benar. Bidang yang memotong diagonal ruang balok berbentuk persegi panjang dengan sisi √(p²+l²) dan t." }
+    ]
+  },
+
+  // ============ SOAL 29 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<p>Sebuah limas memiliki alas berbentuk segi-7. Jika bagian puncaknya dipotong sejajar dengan alas, maka bangun baru yang terbentuk menyerupai...</p>`,
+    options:[
+      {label:'A', text:`Limas Segilima`},
+      {label:'B', text:`Prisma Segitujuh`},
+      {label:'C', text:`Frustum (Limas terpancung)`},
+      {label:'D', text:`Kerucut`}
+    ],
+    correct:[2],
+    explanation:`<p>Memotong bagian puncak limas secara sejajar alas akan menghasilkan bangun ruang yang disebut frustum atau limas terpancung.</p>`
+  },
+
+  // ============ SOAL 30 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Evaluasi pernyataan tentang kubus yang dibagi menjadi 27 kubus kecil (3x3x3).</div>`,
+    options:[
+      {label:'A', text:`Kubus yang memiliki 3 sisi tercat berada di sudut-sudut kubus besar.`},
+      {label:'B', text:`Jika kubus kecil yang berada di tengah (tidak tercat) dikeluarkan, sisanya memiliki 26 kubus kecil.`},
+      {label:'C', text:`Kubus yang memiliki 2 sisi tercat berada tepat di tengah rusuk kubus besar.`},
+      {label:'D', text:`Jumlah total sisi kubus kecil yang tercat adalah 9 sisi.`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>A benar (8 di sudut). B benar (27 - 1 = 26). C benar (12 di rusuk). D salah, total sisi tercat = (8x3) + (12x2) + (6x1) = 24 + 24 + 6 = 54 sisi.</p>`
+  }
+];
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+const state = {
+  answers: questions.map(q => {
+    if(q.type==='bs-multi') return q.items.map(()=>null);
+    if(q.type==='match') return []; // array of paired indices
+    return [];
+  }),
+  checked: questions.map(()=>false)
+};
+
+/* ===================================================================
+   RENDER SOAL
+   =================================================================== */
+const container = document.getElementById('questions');
+
+function renderQuestion(q, idx){
+  const card = document.createElement('section');
+  card.className = 'q-card';
+  card.id = `q-${idx}`;
+  card.style.animationDelay = `${Math.min(idx*40,400)}ms`;
+
+  const hotsBadge = q.hots ? '<span class="q-tag hots">HOTS</span>' : '';
+  let statusPill = '<span class="q-status-pill" id="status-'+idx+'">Belum dijawab</span>';
+
+  let html = `
+    <div class="q-head">
+      <div class="q-num-block">
+        <div class="q-num">${String(idx+1).padStart(2,'0')}</div>
+        <div>
+          <span class="q-tag">${q.tag}</span> ${hotsBadge}
+        </div>
+      </div>
+      ${statusPill}
+    </div>
+    <div class="q-body">${q.body}</div>
+  `;
+
+  if(q.type === 'pg' || q.type === 'pgk'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      let content = '';
+      if(opt.svg) content = `<div class="opt-svg">${opt.svg}</div>`;
+      else content = `<div class="opt-text"><span class="opt-label">${opt.label}.</span>${opt.text}</div>`;
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark">${q.type === 'pgk' ? '✓' : opt.label}</div>
+        ${content}
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'bs-multi'){
+    q.items.forEach((it,i)=>{
+      html += `<div class="sub-item">
+        <div class="sub-content">
+          ${it.svg ? `<div class="sub-svg">${it.svg}</div>` : ''}
+          <div class="text">${it.text}</div>
+        </div>
+        <div class="bs-buttons">
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="true">BENAR</button>
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="false">SALAH</button>
+        </div>
+      </div>`;
+    });
+  } else if(q.type === 'match'){
+     // Render matching logic here
+     html += `<div class="match-container" data-q="${idx}">`;
+     html += `<div class="match-col">`;
+     q.pairs.forEach((p, i) => {
+       html += `<div class="match-item left" data-q="${idx}" data-side="left" data-i="${i}">
+                 <div class="match-num">${i+1}</div>
+                 <div class="match-content">${p.left}</div>
+               </div>`;
+     });
+     html += `</div><div class="match-col">`;
+     // Shuffle right side
+     const rightItems = q.pairs.map((p, i) => ({...p, originalIdx: i})).sort(() => Math.random() - 0.5);
+     rightItems.forEach((p, i) => {
+       html += `<div class="match-item right" data-q="${idx}" data-side="right" data-i="${p.originalIdx}" data-shuffled="${i}">
+                 <div class="match-num">${String.fromCharCode(65+i)}</div>
+                 <div class="match-content">${p.right_svg ? p.right_svg : p.right}</div>
+               </div>`;
+     });
+     html += `</div></div>`;
+  }
+
+  html += `
+    <div class="q-actions">
+      <button class="btn btn-check" id="check-${idx}" data-q="${idx}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Cek Jawaban
+      </button>
+      <button class="btn btn-reset" id="reset-${idx}" data-q="${idx}">Reset</button>
+    </div>
+    <div class="explanation" id="exp-${idx}">
+      <div class="exp-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Pembahasan
+      </div>
+      <div class="exp-body"></div>
+    </div>
+  `;
+
+  card.innerHTML = html;
+  return card;
+}
+
+questions.forEach((q,i)=> container.appendChild(renderQuestion(q,i)));
+
+/* ===================================================================
+   EVENT HANDLERS — PILIH JAWABAN
+   =================================================================== */
+document.querySelectorAll('.opt').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const type = questions[q].type;
+    if(state.checked[q]) return;
+
+    if(type === 'pg'){
+      state.answers[q] = [i];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.toggle('selected', +o.dataset.i === i);
+      });
+    } else if(type === 'pgk'){
+      if(!state.answers[q].includes(i)) state.answers[q].push(i);
+      else state.answers[q] = state.answers[q].filter(x=>x!==i);
+      el.classList.toggle('selected');
+    }
+    updateStatusPill(q);
+  });
+});
+
+document.querySelectorAll('.bs-btn').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const v = el.dataset.v === 'true';
+    if(state.checked[q]) return;
+
+    state.answers[q][i] = v;
+    const siblings = el.parentElement.querySelectorAll('.bs-btn');
+    siblings.forEach(s=>{
+      s.classList.remove('selected','correct','wrong');
+    });
+    el.classList.add('selected');
+    updateStatusPill(q);
+  });
+});
+
+// Matching Logic
+document.querySelectorAll('.match-item').forEach(el => {
+  el.addEventListener('click', () => {
+    const q = +el.dataset.q;
+    if (state.checked[q]) return;
+
+    const side = el.dataset.side;
+    const i = +el.dataset.i;
+    
+    el.classList.toggle('selected');
+    
+    // Check if selected items form a pair
+    const selectedLeft = document.querySelector(`.match-item.left.selected[data-q="${q}"]`);
+    const selectedRight = document.querySelector(`.match-item.right.selected[data-q="${q}"]`);
+    
+    if (selectedLeft && selectedRight) {
+      const leftIdx = +selectedLeft.dataset.i;
+      const rightIdx = +selectedRight.dataset.i;
+      
+      if (leftIdx === rightIdx) {
+        // Correct match
+        selectedLeft.classList.remove('selected');
+        selectedLeft.classList.add('matched-correct');
+        selectedRight.classList.remove('selected');
+        selectedRight.classList.add('matched-correct');
+        
+        // Store pair
+        state.answers[q].push(leftIdx);
+      } else {
+        // Wrong match
+        selectedLeft.classList.add('matched-wrong');
+        selectedRight.classList.add('matched-wrong');
+        setTimeout(() => {
+          selectedLeft.classList.remove('selected', 'matched-wrong');
+          selectedRight.classList.remove('selected', 'matched-wrong');
+        }, 600);
+      }
+    }
+    updateStatusPill(q);
+  });
+});
+
+function updateStatusPill(q){
+  const pill = document.getElementById('status-'+q);
+  const answered = isAnswered(q);
+  if(state.checked[q]){
+    // sudah dicek
+  } else if(answered){
+    pill.textContent = 'Sudah dijawab';
+    pill.style.background = 'var(--accent-soft)';
+    pill.style.color = 'var(--accent)';
+  } else {
+    pill.textContent = 'Belum dijawab';
+    pill.style.background = '';
+    pill.style.color = '';
+  }
+}
+
+function isAnswered(q){
+  const type = questions[q].type;
+  if(type === 'pg') return state.answers[q].length > 0;
+  if(type === 'pgk') return state.answers[q].length > 0;
+  if(type === 'bs-multi') return state.answers[q].every(a => a !== null);
+  if(type === 'match') return state.answers[q].length === questions[q].pairs.length;
+  return false;
+}
+
+/* ===================================================================
+   CEK JAWABAN
+   =================================================================== */
+document.querySelectorAll('.btn-check').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    if(!isAnswered(q)){
+      showToast('Isi dulu semua jawaban di soal ini ya!');
+      return;
+    }
+    if(state.checked[q]) return;
+    state.checked[q] = true;
+    evaluateAnswer(q);
+    updateScore();
+    updateStatusPill(q);
+    document.getElementById('exp-'+q).classList.add('show');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Sudah Dicek`;
+  });
+});
+
+document.querySelectorAll('.btn-reset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    const type = questions[q].type;
+    if(type === 'pg' || type === 'pgk'){
+      state.answers[q] = [];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.remove('selected','correct','wrong');
+      });
+    } else if (type === 'match') {
+      state.answers[q] = [];
+      document.querySelectorAll(`.match-item[data-q="${q}"]`).forEach(m => {
+        m.classList.remove('selected', 'matched-correct', 'matched-wrong');
+      });
+    } else {
+      state.answers[q] = questions[q].items.map(()=>null);
+      document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+        b.classList.remove('selected','correct','wrong');
+      });
+    }
+    state.checked[q] = false;
+    document.getElementById('exp-'+q).classList.remove('show');
+    const checkBtn = document.getElementById('check-'+q);
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Cek Jawaban`;
+    const card = document.getElementById('q-'+q);
+    card.classList.remove('is-correct','is-wrong','is-answered');
+    const pill = document.getElementById('status-'+q);
+    pill.textContent = 'Belum dijawab';
+    pill.className = 'q-status-pill';
+    updateScore();
+    updateStatusPill(q);
+  });
+});
+
+function evaluateAnswer(q){
+  const type = questions[q].type;
+  const card = document.getElementById('q-'+q);
+  const pill = document.getElementById('status-'+q);
+  let isCorrect = false;
+
+  if(type === 'pg'){
+    const selected = state.answers[q][0];
+    const correctIdx = questions[q].correct[0];
+    isCorrect = selected === correctIdx;
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(i === correctIdx) o.classList.add('correct');
+      else if(i === selected) o.classList.add('wrong');
+    });
+  } else if(type === 'pgk'){
+    const selected = [...state.answers[q]].sort();
+    const correct = [...questions[q].correct].sort();
+    isCorrect = selected.length === correct.length && selected.every((v,i)=>v===correct[i]);
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(questions[q].correct.includes(i)) o.classList.add('correct');
+      else if(state.answers[q].includes(i)) o.classList.add('wrong');
+    });
+  } else if(type === 'bs-multi'){
+    isCorrect = questions[q].items.every((it,i)=> state.answers[q][i] === it.correct);
+    document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+      const i = +b.dataset.i;
+      const v = b.dataset.v === 'true';
+      b.classList.remove('selected','correct','wrong');
+      const item = questions[q].items[i];
+      const studentSelected = state.answers[q][i] === v;
+      const isThisCorrect = v === item.correct;
+
+      if(studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      } else if(studentSelected && !isThisCorrect){
+        b.classList.add('wrong');
+      } else if(!studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      }
+    });
+  } else if(type === 'match'){
+    // Since we only push to state.answers[q] on correct match during selection,
+    // if all are matched, it's correct. If they somehow clicked check without matching all,
+    // isAnswered would have blocked it. 
+    // Actually, we should check if all pairs are matched correctly.
+    const matchedItems = document.querySelectorAll(`.match-item.matched-correct[data-q="${q}"]`);
+    isCorrect = matchedItems.length === questions[q].pairs.length * 2; // left and right both have the class
+  }
+
+  if(isCorrect){
+    card.classList.add('is-correct');
+    pill.textContent = '✓ Benar';
+    pill.className = 'q-status-pill benar';
+  } else {
+    card.classList.add('is-wrong');
+    pill.textContent = '✗ Salah';
+    pill.className = 'q-status-pill salah';
+  }
+  card.classList.add('is-answered');
+
+  const expBody = document.querySelector(`#exp-${q} .exp-body`);
+  if(type === 'bs-multi'){
+    let html = '';
+    questions[q].items.forEach((it,i)=>{
+      html += `<p><strong>${String.fromCharCode(97+i)}.</strong> ${it.exp}</p>`;
+    });
+    expBody.innerHTML = html;
+  } else {
+    expBody.innerHTML = questions[q].explanation;
+  }
+}
+
+/* ===================================================================
+   UPDATE SCORE & DONUT
+   =================================================================== */
+function updateScore(){
+  let benar = 0, salah = 0, kosong = 0;
+  state.checked.forEach((c,i)=>{
+    if(!c){ kosong++; return; }
+    const type = questions[i].type;
+    let isCorrect = false;
+    if(type === 'pg'){
+      isCorrect = state.answers[i][0] === questions[i].correct[0];
+    } else if(type === 'pgk'){
+      const sel = [...state.answers[i]].sort();
+      const cor = [...questions[i].correct].sort();
+      isCorrect = sel.length === cor.length && sel.every((v,k)=>v===cor[k]);
+    } else if(type === 'bs-multi'){
+      isCorrect = questions[i].items.every((it,k)=> state.answers[i][k] === it.correct);
+    } else if(type === 'match'){
+      const matchedItems = document.querySelectorAll(`.match-item.matched-correct[data-q="${i}"]`);
+      isCorrect = matchedItems.length === questions[i].pairs.length * 2;
+    }
+    if(isCorrect) benar++; else salah++;
+  });
+
+  const total = questions.length;
+  const benarPct = (benar / total) * 100;
+  const salahPct = (salah / total) * 100;
+
+  document.getElementById('seg-correct').setAttribute('stroke-dasharray', `${benarPct} ${100 - benarPct}`);
+  const wrongSeg = document.getElementById('seg-wrong');
+  wrongSeg.setAttribute('stroke-dasharray', `${salahPct} ${100 - salahPct}`);
+  wrongSeg.setAttribute('stroke-dashoffset', `${-benarPct}`);
+
+  document.getElementById('stat-benar').textContent = benar;
+  document.getElementById('stat-salah').textContent = salah;
+  document.getElementById('stat-kosong').textContent = kosong;
+
+  const pct = Math.round((benar / total) * 100);
+  document.getElementById('pct-display').innerHTML = pct + '<span style="font-size:11px">%</span>';
+
+  const checked = state.checked.filter(c=>c).length;
+  document.getElementById('progress-fill').style.width = ((checked/total)*100) + '%';
+
+  document.getElementById('sum-benar').textContent = benar;
+  document.getElementById('sum-salah').textContent = salah;
+  document.getElementById('sum-score').textContent = Math.round((benar/total)*100);
+
+  const banner = document.getElementById('summary-banner');
+  if(checked > 0){
+    banner.classList.add('show');
+    if(checked === total){
+      if(benar === total){
+        document.getElementById('summary-title').textContent = 'Luar biasa! Semua benar! 🎉';
+        document.getElementById('summary-msg').textContent = 'Kamu menguasai bangun ruang dengan sempurna. Pertahankan!';
+      } else {
+        document.getElementById('summary-title').textContent = `Selesai! Skor ${Math.round((benar/total)*100)}/100`;
+        document.getElementById('summary-msg').textContent = `Kamu menjawab ${benar} dari ${total} soal dengan benar. Pelajari kembali pembahasan soal yang salah.`;
+      }
+    } else {
+      document.getElementById('summary-title').textContent = `Sedang berjalan... ${checked}/${total} soal`;
+      document.getElementById('summary-msg').textContent = `Kamu sudah mengecek ${checked} soal. Lanjutkan ke soal berikutnya!`;
+    }
+  }
+}
+
+/* ===================================================================
+   CANVAS DRAWING — KANVAS HITUNG (FIXED SCROLL & DPR)
+   =================================================================== */
+const drawer = document.getElementById('calc-drawer');
+const overlay = document.getElementById('calc-overlay');
+const openBtn = document.getElementById('open-canvas');
+const closeBtn = document.getElementById('calc-close');
+
+openBtn.addEventListener('click', ()=>{
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  setTimeout(initCanvasIfNeeded, 400); 
+});
+function closeDrawer(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('show');
+}
+closeBtn.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+const canvas = document.getElementById('calc-canvas');
+const ctx = canvas.getContext('2d');
+let canvasInited = false;
+let drawing = false;
+let lastX = 0, lastY = 0;
+let currentColor = '#1E1810';
+let currentSize = 3.5;
+const dpr = window.devicePixelRatio || 1;
+
+function initCanvasIfNeeded(){
+  if(canvasInited) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 3000 * dpr;
+  
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  
+  canvasInited = true;
+  drawGuideLines();
+}
+
+function drawGuideLines(){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(31,24,16,0.06)';
+  ctx.lineWidth = 1 * dpr;
+  for(let y = 40 * dpr; y < 3000 * dpr; y += 32 * dpr){
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+}
+
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: (clientX - rect.left) * dpr,
+    y: (clientY - rect.top) * dpr
+  };
+}
+
+function startDraw(e){
+  if(e.button !== undefined && e.button !== 0) return; 
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  lastX = p.x; lastY = p.y;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, (currentSize * dpr) / 2, 0, Math.PI*2);
+  ctx.fillStyle = currentColor;
+  ctx.fill();
+}
+function draw(e){
+  if(!drawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+}
+function endDraw(){ drawing = false; }
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('touchstart', startDraw, {passive:false});
+document.addEventListener('mousemove', draw);
+document.addEventListener('mouseup', endDraw);
+document.addEventListener('touchmove', draw, {passive:false});
+document.addEventListener('touchend', endDraw);
+document.addEventListener('touchcancel', endDraw);
+
+document.querySelectorAll('.color-swatch').forEach(s=>{
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');
+    currentColor = s.dataset.color;
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+  });
+});
+
+document.querySelectorAll('.size-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentSize = parseFloat(b.dataset.size);
+    ctx.lineWidth = currentSize * dpr;
+  });
+});
+
+document.getElementById('tool-clear').addEventListener('click', ()=>{
+  if(confirm('Hapus semua tulisan di kanvas?')){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    showToast('Kanvas sudah dibersihkan');
+  }
+});
+
+document.getElementById('tool-pdf').addEventListener('click', async ()=>{
+  showToast('Menyiapkan PDF...');
+  try{
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+    const pageW = 210, pageH = 297, margin = 10;
+    const imgW = pageW - 2*margin;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    let heightLeft = imgH;
+    let position = margin;
+    
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+    heightLeft -= (pageH - 2*margin);
+    
+    while(heightLeft > 0){
+      position = margin - (imgH - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+      heightLeft -= (pageH - 2*margin);
+    }
+    
+    pdf.save('catatan-perhitungan-bangun-ruang.pdf');
+    showToast('PDF berhasil disimpan!');
+  }catch(err){
+    showToast('Gagal menyimpan PDF: ' + err.message);
+  }
+});
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+updateScore();
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+});
+</script>
+</body>
+</html>
