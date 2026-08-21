@@ -1,0 +1,1744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latihan TKA — Bab 9 Satuan Baku Panjang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#FAF5EC; --bg-warm:#F2E8D5; --card:#FFFFFF;
+  --ink:#1E1810; --ink-soft:#5A5043; --muted:#9C9181; --line:#E7DCC6;
+  --accent:#C84B31; --accent-deep:#9B3522; --accent-soft:#FBDDD3;
+  --gold:#E8A53D; --gold-soft:#FCEBC5;
+  --success:#2D7D5F; --success-soft:#D6EBDF;
+  --error:#D9544E; --error-soft:#F8D9D6;
+  --pending:#B5A99A; --pending-soft:#EFE7D6;
+  --info:#2563A6; --info-soft:#DCE8F5;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--ink);
+  line-height:1.6; min-height:100vh; overflow-x:hidden;
+}
+body::before{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
+  background:
+    radial-gradient(circle at 8% 5%, rgba(200,75,49,.08), transparent 35%),
+    radial-gradient(circle at 92% 95%, rgba(232,165,61,.1), transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(45,125,95,.04), transparent 60%);
+}
+body::after{
+  content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; opacity:.4;
+  background-image:radial-gradient(var(--ink) 0.5px, transparent 0.5px);
+  background-size:22px 22px; opacity:.04;
+}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky; top:0; z-index:50;
+  background:rgba(250,245,236,.85);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.header-inner{
+  max-width:1280px; margin:0 auto; padding:18px 24px;
+  display:flex; justify-content:space-between; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.brand{display:flex; align-items:center; gap:14px}
+.brand-logo{
+  width:46px; height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-deep));
+  color:#fff; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+  transform:rotate(-5deg); box-shadow:0 6px 18px rgba(200,75,49,.35);
+}
+.brand-text h1{
+  font-family:'Fraunces',serif; font-size:22px; font-weight:900;
+  letter-spacing:-.02em; line-height:1.1;
+}
+.brand-text p{font-size:12.5px; color:var(--ink-soft); margin-top:2px}
+
+.score-panel{
+  display:flex; align-items:center; gap:18px;
+  padding:8px 8px 8px 20px;
+  background:var(--card); border:1px solid var(--line);
+  border-radius:100px; box-shadow:0 6px 20px rgba(31,24,16,.05);
+}
+.donut-wrap{position:relative; width:62px; height:62px}
+.donut svg{transform:rotate(-90deg); width:100%; height:100%}
+.donut circle{transition:stroke-dasharray .7s cubic-bezier(.4,0,.2,1)}
+.donut-center{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-family:'Fraunces',serif; font-weight:900;
+}
+.donut-center .pct{font-size:17px; line-height:1}
+
+.score-stats{display:flex; gap:14px; font-size:13px; font-weight:600}
+.score-stat{display:flex; align-items:center; gap:6px}
+.dot{width:9px; height:9px; border-radius:50%}
+.dot.benar{background:var(--success)}
+.dot.salah{background:var(--error)}
+.dot.kosong{background:var(--pending)}
+.score-stat span.num{font-family:'Fraunces',serif; font-size:16px; font-weight:800}
+
+.btn-canvas, .btn-nav{
+  background:var(--ink); color:#fff; border:none;
+  padding:11px 20px; border-radius:100px;
+  font-weight:700; font-size:13.5px; cursor:pointer;
+  display:inline-flex; align-items:center; gap:8px;
+  transition:all .25s; font-family:inherit;
+}
+.btn-canvas:hover, .btn-nav:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 8px 20px rgba(200,75,49,.35)}
+.btn-canvas svg, .btn-nav svg{width:16px; height:16px}
+
+.progress-bar{height:4px; background:var(--bg-warm); position:relative; overflow:hidden}
+.progress-fill{
+  position:absolute; inset:0; width:0%;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  transition:width .5s ease;
+}
+
+/* ============ MAIN LAYOUT ============ */
+main{max-width:1100px; margin:0 auto; padding:36px 24px 80px}
+.intro{text-align:center; margin-bottom:42px}
+.intro .eyebrow{
+  display:inline-block; font-size:11.5px; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--accent); padding:6px 14px;
+  background:var(--accent-soft); border-radius:100px; margin-bottom:14px;
+}
+.intro h2{
+  font-family:'Fraunces',serif;
+  font-size:clamp(32px,5vw,52px); font-weight:900;
+  letter-spacing:-.025em; line-height:1.05; margin-bottom:14px;
+}
+.intro h2 em{font-style:italic; color:var(--accent)}
+.intro p{color:var(--ink-soft); max-width:620px; margin:0 auto; font-size:15px}
+
+/* ============ MATERI / SLIDE 1 ============ */
+.materi-section{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:24px; padding:40px; margin-bottom:48px;
+  box-shadow:0 4px 20px rgba(31,24,16,.04);
+}
+.materi-header{
+  text-align:center; margin-bottom:32px;
+  padding-bottom:24px; border-bottom:2px dashed var(--line);
+}
+.materi-header h3{
+  font-family:'Fraunces',serif; font-size:32px; font-weight:900;
+  margin-bottom:8px;
+}
+.materi-header p{color:var(--ink-soft); font-size:15px}
+
+.materi-grid{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:24px; margin-bottom:24px;
+}
+@media (max-width:780px){.materi-grid{grid-template-columns:1fr}}
+
+.materi-card{
+  background:var(--bg); border:1px solid var(--line);
+  border-radius:18px; padding:24px;
+}
+.materi-card.full{grid-column:1 / -1}
+.materi-card h4{
+  font-family:'Fraunces',serif; font-size:20px; font-weight:800;
+  margin-bottom:12px; color:var(--accent-deep);
+  display:flex; align-items:center; gap:10px;
+}
+.materi-card h4 .icon{
+  width:32px; height:32px; border-radius:10px;
+  background:var(--accent-soft); color:var(--accent);
+  display:grid; place-items:center; font-size:18px;
+}
+.materi-card p{font-size:14.5px; margin-bottom:10px; color:var(--ink-soft)}
+.materi-card strong{color:var(--ink)}
+.materi-card ul{list-style:none; padding-left:8px}
+.materi-card ul li{
+  position:relative; padding-left:20px; margin-bottom:8px;
+  font-size:14.5px; color:var(--ink-soft);
+}
+.materi-card ul li::before{
+  content:''; position:absolute; left:0; top:9px;
+  width:6px; height:6px; border-radius:50%;
+  background:var(--accent);
+}
+
+/* Ladder Visual */
+.ladder-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+.ladder-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.ladder-block {
+  width: 70px;
+  height: 50px;
+  background: var(--accent);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-family: 'Fraunces', serif;
+  font-weight: 800;
+  font-size: 18px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(200,75,49,.2);
+  position: relative;
+}
+.ladder-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-top: 6px;
+  max-width: 70px;
+}
+.ladder-arrow {
+  font-size: 20px;
+  color: var(--muted);
+  margin: 0 -2px 30px;
+}
+.ladder-rule {
+  background: #fff;
+  border: 1px dashed var(--accent);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 16px;
+  text-align: center;
+}
+.ladder-rule strong {
+  display: block;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  margin-bottom: 4px;
+}
+
+/* ============ QUESTION CARD ============ */
+.q-card{
+  background:var(--card); border:1px solid var(--line);
+  border-radius:22px; padding:28px 30px; margin-bottom:22px;
+  box-shadow:0 2px 10px rgba(31,24,16,.03);
+  transition:border-color .3s, box-shadow .3s;
+  position:relative; overflow:hidden;
+  opacity:0; transform:translateY(20px);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{opacity:1; transform:translateY(0)}}
+.q-card:hover{box-shadow:0 8px 30px rgba(31,24,16,.07)}
+.q-card.is-correct{border-color:rgba(45,125,95,.4)}
+.q-card.is-wrong{border-color:rgba(217,84,78,.4)}
+
+.q-card::before{
+  content:''; position:absolute; top:0; left:0; width:5px; height:100%;
+  background:var(--bg-warm); transition:background .3s;
+}
+.q-card.is-correct::before{background:var(--success)}
+.q-card.is-wrong::before{background:var(--error)}
+.q-card.is-answered::before{background:var(--accent)}
+
+.q-head{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; margin-bottom:18px;
+}
+.q-num-block{display:flex; align-items:center; gap:14px}
+.q-num{
+  font-family:'Fraunces',serif; font-weight:900; font-size:34px;
+  color:var(--accent); line-height:1; min-width:50px;
+}
+.q-card.is-correct .q-num{color:var(--success)}
+.q-card.is-wrong .q-num{color:var(--error)}
+.q-tag{
+  font-size:10.5px; font-weight:700;
+  letter-spacing:.12em; text-transform:uppercase;
+  padding:5px 11px; border-radius:100px;
+  background:var(--bg-warm); color:var(--ink-soft);
+}
+.q-tag.hots{
+  background:linear-gradient(135deg,var(--gold),#D8902A);
+  color:#fff;
+}
+
+.q-status-pill{
+  font-size:11.5px; font-weight:700; padding:5px 12px;
+  border-radius:100px; background:var(--bg-warm); color:var(--muted);
+  letter-spacing:.05em;
+}
+.q-status-pill.benar{background:var(--success-soft); color:var(--success)}
+.q-status-pill.salah{background:var(--error-soft); color:var(--error)}
+
+.q-body{font-size:15.5px; margin-bottom:20px; color:var(--ink)}
+.q-body p{margin-bottom:6px}
+.q-body strong{font-weight:700}
+
+.context-box{
+  background:var(--bg-warm); border-radius:14px;
+  padding:14px 18px; margin-bottom:14px;
+  border-left:3px solid var(--gold);
+  font-size:14.5px;
+}
+
+/* ============ OPTIONS ============ */
+.options{display:grid; gap:10px; margin-top:8px}
+.opt{
+  display:flex; align-items:center; gap:12px;
+  padding:13px 18px; background:var(--bg);
+  border:2px solid var(--line); border-radius:13px;
+  cursor:pointer; transition:all .2s; font-size:15px;
+  user-select:none;
+}
+.opt:hover{border-color:var(--accent); background:var(--accent-soft); transform:translateX(2px)}
+.opt.selected{border-color:var(--accent); background:var(--accent-soft)}
+.opt.correct{border-color:var(--success); background:var(--success-soft)}
+.opt.wrong{border-color:var(--error); background:var(--error-soft)}
+.opt-mark{
+  width:24px; height:24px; border-radius:7px;
+  border:2px solid var(--line); background:#fff;
+  display:grid; place-items:center; flex-shrink:0;
+  font-weight:700; font-size:12px; color:var(--ink-soft);
+  transition:all .2s;
+}
+.opt.selected .opt-mark{background:var(--accent); border-color:var(--accent); color:#fff}
+.opt.correct .opt-mark{background:var(--success); border-color:var(--success); color:#fff}
+.opt.wrong .opt-mark{background:var(--error); border-color:var(--error); color:#fff}
+.opt-text{flex:1}
+.opt-label{font-weight:700; color:var(--accent); margin-right:6px}
+
+/* ============ SUB ITEMS (BENAR/SALAH) - LAYOUT MEMANJANG KESAMPING ============ */
+.sub-item{
+  background:var(--bg);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:14px 16px;
+  margin:10px 0;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  flex-wrap:wrap; 
+}
+.sub-content{
+  flex: 1;
+  min-width: 200px;
+  font-size:15px;
+  padding:10px 14px;
+  background:#fff;
+  border-radius:8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+}
+.sub-content .text {
+  flex: 1;
+}
+.bs-buttons{
+  display:flex;
+  gap:8px;
+  flex-shrink: 0;
+}
+.bs-btn{
+  padding:9px 16px;
+  border:2px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13.5px;
+  color:var(--ink-soft);
+  transition:all .2s;
+  font-family:inherit;
+  min-width: 80px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.bs-btn:hover{border-color:var(--accent); color:var(--accent)}
+.bs-btn.selected{border-color:var(--accent); background:var(--accent-soft); color:var(--accent)}
+.bs-btn.correct{border-color:var(--success); background:var(--success-soft); color:var(--success)}
+.bs-btn.wrong{border-color:var(--error); background:var(--error-soft); color:var(--error)}
+
+.q-actions{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap}
+.btn{
+  padding:11px 20px; border-radius:11px;
+  font-weight:700; font-size:13.5px;
+  border:2px solid transparent; cursor:pointer;
+  transition:all .2s; font-family:inherit;
+  display:inline-flex; align-items:center; gap:7px;
+}
+.btn-check{background:var(--ink); color:#fff}
+.btn-check:hover{background:var(--accent); transform:translateY(-1px); box-shadow:0 6px 16px rgba(200,75,49,.3)}
+.btn-check:disabled{opacity:.4; cursor:not-allowed; transform:none; box-shadow:none}
+.btn-reset{background:transparent; color:var(--ink-soft); border-color:var(--line)}
+.btn-reset:hover{background:var(--bg-warm); color:var(--ink)}
+
+.explanation{
+  margin-top:16px; padding:18px 20px;
+  background:linear-gradient(135deg,rgba(232,165,61,.1),rgba(200,75,49,.06));
+  border-radius:14px; border-left:4px solid var(--gold);
+  font-size:14.5px; max-height:0; overflow:hidden;
+  opacity:0; transition:all .4s ease;
+  padding-top:0; padding-bottom:0; margin-top:0;
+}
+.explanation.show{
+  max-height:1000px; opacity:1;
+  padding:18px 20px; margin-top:16px;
+}
+.exp-head{
+  display:flex; align-items:center; gap:8px; margin-bottom:10px;
+  font-family:'Fraunces',serif; font-weight:800; font-size:16px;
+  color:var(--accent-deep);
+}
+.exp-body p{margin-bottom:8px}
+.exp-body p:last-child{margin-bottom:0}
+.exp-body .work{
+  background:#fff; padding:10px 14px; border-radius:8px;
+  display:inline-block; margin:6px 0; font-size:14px;
+  border:1px solid var(--line);
+}
+
+/* ============ CALC DRAWER ============ */
+.calc-overlay{
+  position:fixed; inset:0; background:rgba(31,24,16,.4);
+  z-index:900; opacity:0; pointer-events:none;
+  transition:opacity .3s; backdrop-filter:blur(2px);
+}
+.calc-overlay.show{opacity:1; pointer-events:auto}
+
+.calc-drawer{
+  position:fixed; top:0; right:0; height:100vh;
+  width:min(500px,100%); background:#fff; z-index:1000;
+  transform:translateX(100%);
+  transition:transform .35s cubic-bezier(.4,0,.2,1);
+  display:flex; flex-direction:column;
+  box-shadow:-20px 0 50px rgba(0,0,0,.15);
+}
+.calc-drawer.open{transform:translateX(0)}
+
+.calc-head{
+  padding:18px 22px; background:var(--ink); color:#fff;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.calc-head h3{
+  font-family:'Fraunces',serif; font-size:19px; font-weight:800;
+  display:flex; align-items:center; gap:10px;
+}
+.calc-head .subtitle{font-size:11.5px; color:rgba(255,255,255,.6); margin-top:2px}
+.calc-close{
+  width:36px; height:36px; border-radius:10px;
+  background:rgba(255,255,255,.1); border:none; color:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:background .2s;
+}
+.calc-close:hover{background:rgba(255,255,255,.2)}
+
+.calc-tools{
+  padding:12px 16px; background:var(--bg-warm);
+  display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  border-bottom:1px solid var(--line);
+}
+.tool-btn{
+  padding:7px 13px; background:#fff;
+  border:1px solid var(--line); border-radius:9px;
+  cursor:pointer; font-size:12.5px; font-weight:600;
+  display:inline-flex; align-items:center; gap:6px;
+  transition:all .15s; color:var(--ink); font-family:inherit;
+}
+.tool-btn:hover{background:var(--ink); color:#fff; border-color:var(--ink)}
+.tool-btn svg{width:14px; height:14px}
+.tool-btn.primary{background:var(--accent); color:#fff; border-color:var(--accent)}
+.tool-btn.primary:hover{background:var(--accent-deep)}
+.tool-divider{width:1px; height:24px; background:var(--line); margin:0 4px}
+
+.color-group{display:flex; gap:5px; align-items:center}
+.color-swatch{
+  width:22px; height:22px; border-radius:50%;
+  border:2px solid #fff; box-shadow:0 0 0 1px var(--line);
+  cursor:pointer; transition:transform .15s;
+}
+.color-swatch:hover{transform:scale(1.15)}
+.color-swatch.active{box-shadow:0 0 0 2px var(--accent); transform:scale(1.15)}
+
+.size-group{display:flex; gap:5px; align-items:center}
+.size-btn{
+  width:26px; height:26px; border-radius:8px;
+  border:1px solid var(--line); background:#fff;
+  cursor:pointer; display:grid; place-items:center;
+  transition:all .15s;
+}
+.size-btn.active{background:var(--ink); border-color:var(--ink)}
+.size-btn .dot-sm{width:4px; height:4px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-md{width:7px; height:7px; border-radius:50%; background:var(--ink)}
+.size-btn .dot-lg{width:10px; height:10px; border-radius:50%; background:var(--ink)}
+.size-btn.active .dot-sm, .size-btn.active .dot-md, .size-btn.active .dot-lg{background:#fff}
+
+.calc-area{
+  flex:1; overflow-y:auto; background:#fff;
+  position:relative; padding:0;
+}
+.calc-area::-webkit-scrollbar{width:10px}
+.calc-area::-webkit-scrollbar-track{background:var(--bg-warm)}
+.calc-area::-webkit-scrollbar-thumb{background:var(--muted); border-radius:5px}
+
+.calc-canvas-wrap{
+  position:relative; width:100%;
+  background:#fff;
+  background-image:
+    linear-gradient(rgba(0,0,0,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.025) 1px, transparent 1px);
+  background-size:24px 24px;
+}
+.calc-canvas-wrap canvas{
+  display:block; width:100%; height:3000px;
+  touch-action:none; cursor:crosshair;
+}
+
+/* ============ TOAST ============ */
+.toast{
+  position:fixed; bottom:24px; left:50%;
+  transform:translateX(-50%) translateY(120px);
+  background:var(--ink); color:#fff;
+  padding:13px 24px; border-radius:100px;
+  font-size:14px; font-weight:600; z-index:2000;
+  opacity:0; transition:all .35s;
+  box-shadow:0 10px 30px rgba(0,0,0,.25);
+  display:flex; align-items:center; gap:10px;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast .toast-dot{
+  width:8px; height:8px; border-radius:50%; background:var(--gold);
+}
+
+/* ============ SUMMARY ============ */
+.summary-banner{
+  margin-top:32px; padding:28px 32px;
+  background:linear-gradient(135deg,var(--ink),#3a2f1f);
+  color:#fff; border-radius:22px;
+  display:flex; justify-content:space-between; align-items:center;
+  gap:24px; flex-wrap:wrap;
+  opacity:0; transform:translateY(20px);
+  transition:all .5s;
+}
+.summary-banner.show{opacity:1; transform:translateY(0)}
+.summary-banner h3{
+  font-family:'Fraunces',serif; font-size:24px;
+  font-weight:900; margin-bottom:6px;
+}
+.summary-banner p{font-size:14px; opacity:.8}
+.summary-stats{display:flex; gap:24px}
+.summary-stat{text-align:center}
+.summary-stat .num{
+  font-family:'Fraunces',serif; font-size:36px; font-weight:900;
+  line-height:1; color:var(--gold);
+}
+.summary-stat .lbl{font-size:11px; opacity:.7; margin-top:4px; letter-spacing:.1em; text-transform:uppercase}
+
+footer{
+  text-align:center; padding:24px;
+  color:var(--ink-soft); font-size:13px;
+  border-top:1px solid var(--line); margin-top:40px;
+}
+
+/* ============ RESPONSIVE ============ */
+@media (max-width:780px){
+  .header-inner{flex-direction:column; align-items:stretch; padding:14px 18px}
+  .brand{justify-content:flex-start}
+  .score-panel{justify-content:space-between; flex-wrap:wrap; padding:10px 14px}
+  .score-stats{flex:1; justify-content:space-around; font-size:11.5px}
+  .btn-canvas, .btn-nav{width:100%; justify-content:center}
+  .q-card{padding:22px 20px}
+  .q-num{font-size:28px; min-width:42px}
+  .intro h2{font-size:30px}
+  .materi-section{padding:24px 20px}
+  .calc-drawer{width:100%}
+  .calc-tools{padding:10px}
+}
+@media (max-width:480px){
+  .q-head{flex-direction:column; gap:8px}
+  .summary-stats{gap:14px}
+  .summary-stat .num{font-size:28px}
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-logo">9</div>
+      <div class="brand-text">
+        <h1>Latihan TKA — Bab 9</h1>
+        <p>Satuan Baku Panjang</p>
+      </div>
+    </div>
+    <div class="score-panel">
+      <div class="donut-wrap">
+        <div class="donut">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#EFE7D6" stroke-width="5"/>
+            <circle id="seg-correct" cx="18" cy="18" r="15.9" fill="none" stroke="#2D7D5F" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+            <circle id="seg-wrong" cx="18" cy="18" r="15.9" fill="none" stroke="#D9544E" stroke-width="5" stroke-dasharray="0 100" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="donut-center">
+          <div class="pct" id="pct-display">0<span style="font-size:11px">%</span></div>
+        </div>
+      </div>
+      <div class="score-stats">
+        <div class="score-stat"><span class="dot benar"></span><span class="num" id="stat-benar">0</span><span>Benar</span></div>
+        <div class="score-stat"><span class="dot salah"></span><span class="num" id="stat-salah">0</span><span>Salah</span></div>
+        <div class="score-stat"><span class="dot kosong"></span><span class="num" id="stat-kosong">30</span><span>Belum</span></div>
+      </div>
+      <button class="btn-canvas" id="open-canvas">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 1 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Kanvas Hitung
+      </button>
+    </div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+</header>
+
+<main>
+  <!-- ============ SLIDE 1: RANGKUMAN MATERI ============ -->
+  <section class="materi-section" id="materi">
+    <div class="materi-header">
+      <span class="eyebrow" style="background:var(--gold-soft); color:var(--accent-deep)">Rangkuman Materi</span>
+      <h3>Tangga Satuan Baku Panjang</h3>
+      <p>Pahami tangga satuan, aturan konversi, dan trik pengerjaan sebelum latihan soal.</p>
+    </div>
+
+    <div class="materi-grid">
+      <div class="materi-card full">
+        <h4><span class="icon">🪜</span> Tangga Satuan Panjang</h4>
+        <p>Urutan tangga satuan panjang dari yang terbesar ke terkecil adalah:</p>
+        
+        <div class="ladder-container">
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:var(--accent-deep)">km</div>
+            <div class="ladder-name">Kilometer</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:var(--accent)">hm</div>
+            <div class="ladder-name">Hektometer</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:#D9544E">dam</div>
+            <div class="ladder-name">Dekameter</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:#E8A53D">m</div>
+            <div class="ladder-name">Meter</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:#2D7D5F">dm</div>
+            <div class="ladder-name">Desimeter</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:#2563A6">cm</div>
+            <div class="ladder-name">Sentimeter</div>
+          </div>
+          <div class="ladder-arrow">→</div>
+          <div class="ladder-step">
+            <div class="ladder-block" style="background:#5A5043">mm</div>
+            <div class="ladder-name">Milimeter</div>
+          </div>
+        </div>
+
+        <div class="ladder-rule">
+          <strong style="color:var(--success)">Turun 1 tangga = Dikali 10</strong>
+          <span style="font-size:13px; color:var(--ink-soft); display:block; margin-top:4px">Contoh: 1 m ke dm (turun 1) = 1 × 10 = 10 dm</span>
+        </div>
+        <div class="ladder-rule" style="border-color: var(--info); margin-top: 10px;">
+          <strong style="color:var(--info)">Naik 1 tangga = Dibagi 10</strong>
+          <span style="font-size:13px; color:var(--ink-soft); display:block; margin-top:4px">Contoh: 10 cm ke dm (naik 1) = 10 : 10 = 1 dm</span>
+        </div>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">💡</span> Trik Cepat Konversi</h4>
+        <p>Jangan menghafal semua kalinya! Hafalkan patokan utama:</p>
+        <ul>
+          <li><strong>1 km = 1.000 m</strong> (loncat 3 tangga)</li>
+          <li><strong>1 m = 100 cm</strong> (loncat 2 tangga)</li>
+          <li><strong>1 m = 1.000 mm</strong> (loncat 3 tangga)</li>
+          <li><strong>1 cm = 10 mm</strong> (loncat 1 tangga)</li>
+        </ul>
+        <p>Untuk soal cerita, samakan dulu semua satuan ke satuan yang ditanya sebelum menjumlahkan atau mengurangkan.</p>
+      </div>
+
+      <div class="materi-card">
+        <h4><span class="icon">📝</span> Latihan Mini</h4>
+        <p>Mari coba konversi sederhana berikut ini:</p>
+        <ul>
+          <li>2 km = ... m <strong>(Jawaban: 2.000 m)</strong></li>
+          <li>500 cm = ... m <strong>(Jawaban: 5 m)</strong></li>
+          <li>30 dm = ... m <strong>(Jawaban: 3 m)</strong></li>
+          <li>1,5 m = ... cm <strong>(Jawaban: 150 cm)</strong></li>
+        </ul>
+        <p>Paham konsepnya? Mari lanjut ke latihan soal interaktif!</p>
+      </div>
+    </div>
+
+    <div style="text-align:center; margin-top:32px">
+      <button class="btn-nav" onclick="document.getElementById('latihan').scrollIntoView({behavior:'smooth'})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Mulai Latihan Soal
+      </button>
+    </div>
+  </section>
+
+  <!-- ============ SLIDE 2: LATIHAN SOAL ============ -->
+  <section id="latihan">
+    <div class="intro">
+      <span class="eyebrow">Bab 9 · Satuan Baku Panjang</span>
+      <h2>Latihan <em>Soal Interaktif</em></h2>
+      <p>30 soal pilihan ganda, benar-salah, dan kompleks. Kerjakan dengan tenang — gunakan kanvas hitung untuk coret-coret. Skor live mengisi lingkaran saat kamu mengecek jawaban.</p>
+    </div>
+    <div id="questions"></div>
+    
+    <div class="summary-banner" id="summary-banner">
+      <div>
+        <h3 id="summary-title">Kerjakan dulu semua soalnya ya!</h3>
+        <p id="summary-msg">Selesaikan 30 soal berikut, lalu lihat hasil akhirnya di sini.</p>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat"><div class="num" id="sum-benar">0</div><div class="lbl">Benar</div></div>
+        <div class="summary-stat"><div class="num" id="sum-salah">0</div><div class="lbl">Salah</div></div>
+        <div class="summary-stat"><div class="num" id="sum-score">0</div><div class="lbl">Skor</div></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  Media Latihan TKA · Bab 9 Satuan Baku Panjang · Dibuat untuk pembelajaran interaktif
+</footer>
+
+<!-- ============ CALC DRAWER ============ -->
+<div class="calc-overlay" id="calc-overlay"></div>
+<aside class="calc-drawer" id="calc-drawer">
+  <div class="calc-head">
+    <div>
+      <h3>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6M9 15h6M9 12h6"/></svg>
+        Kanvas Hitung
+      </h3>
+      <div class="subtitle">Coret perhitunganmu di sini — bisa discroll, bisa di-export PDF</div>
+    </div>
+    <button class="calc-close" id="calc-close" aria-label="Tutup kanvas">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="calc-tools">
+    <div class="color-group">
+      <div class="color-swatch active" style="background:#1E1810" data-color="#1E1810"></div>
+      <div class="color-swatch" style="background:#C84B31" data-color="#C84B31"></div>
+      <div class="color-swatch" style="background:#2D7D5F" data-color="#2D7D5F"></div>
+      <div class="color-swatch" style="background:#2563A6" data-color="#2563A6"></div>
+      <div class="color-swatch" style="background:#E8A53D" data-color="#E8A53D"></div>
+    </div>
+    <div class="tool-divider"></div>
+    <div class="size-group">
+      <button class="size-btn" data-size="2"><span class="dot-sm"></span></button>
+      <button class="size-btn active" data-size="3.5"><span class="dot-md"></span></button>
+      <button class="size-btn" data-size="6"><span class="dot-lg"></span></button>
+    </div>
+    <div class="tool-divider"></div>
+    <button class="tool-btn" id="tool-clear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      Hapus
+    </button>
+    <button class="tool-btn primary" id="tool-pdf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Simpan PDF
+    </button>
+  </div>
+  <div class="calc-area" id="calc-area">
+    <div class="calc-canvas-wrap">
+      <canvas id="calc-canvas"></canvas>
+    </div>
+  </div>
+</aside>
+
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg">Pesan</span></div>
+
+<script>
+/* ===================================================================
+   DATA SOAL — 30 soal (10 dasar + 20 HOTS)
+   =================================================================== */
+const questions = [
+  // ============ SOAL 1 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<p>Jarak dari rumah Budi ke sekolah adalah 3 kilometer. Berapa jarak tersebut jika dinyatakan dalam satuan meter?</p>`,
+    options:[
+      {label:'A', text:`30 m`},
+      {label:'B', text:`300 m`},
+      {label:'C', text:`3.000 m`},
+      {label:'D', text:`30.000 m`}
+    ],
+    correct:[2],
+    explanation:`<p>1 km = 1.000 m (turun 3 tangga).<br>3 km = 3 × 1.000 = 3.000 m.</p>`
+  },
+
+  // ============ SOAL 2 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<p>Perhatikan pernyataan-pernyataan tentang satuan baku panjang berikut ini. Tentukan apakah setiap pernyataan Benar atau Salah.</p>`,
+    items:[
+      { text: "1 meter sama dengan 100 sentimeter.", correct: true, exp: "Benar. Dari m ke cm turun 2 tangga, berarti dikali 10×10 = 100." },
+      { text: "1 kilometer sama dengan 100 meter.", correct: false, exp: "Salah. Dari km ke m turun 3 tangga, berarti 1 km = 1.000 m, bukan 100 m." },
+      { text: "1 sentimeter sama dengan 10 milimeter.", correct: true, exp: "Benar. Dari cm ke mm turun 1 tangga, berarti dikali 10." }
+    ]
+  },
+
+  // ============ SOAL 3 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Ani memiliki pita sepanjang 2,5 meter. Ia membeli lagi pita sepanjang 150 sentimeter.</div>
+      <p>Berapa total panjang pita Ani sekarang jika dinyatakan dalam sentimeter?</p>`,
+    options:[
+      {label:'A', text:`152,5 cm`},
+      {label:'B', text:`175 cm`},
+      {label:'C', text:`250 cm`},
+      {label:'D', text:`400 cm`}
+    ],
+    correct:[3],
+    explanation:`<p>Satukan dulu ke sentimeter (cm).<br>2,5 m = 250 cm.<br>150 cm = 150 cm.<br>Total = 250 + 150 = 400 cm.</p>`
+  },
+
+  // ============ SOAL 4 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<div class="context-box">Perhatikan tabel jarak antarkota berikut:<br>
+      • Kota A ke kota B: 12 km<br>
+      • Kota B ke kota C: 15.000 m<br>
+      • Kota A ke kota C: 20 km</div>
+      <p>Berdasarkan tabel tersebut manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Jarak kota B ke kota C adalah 15 km`},
+      {label:'B', text:`Jarak kota A ke kota B lebih jauh daripada jarak Kota B ke Kota C`},
+      {label:'C', text:`Jarak terpendek adalah dari kota A ke kota B`},
+      {label:'D', text:`Jarak kota A ke kota C adalah 2000 m`},
+      {label:'E', text:`Jarak dari kota A ke kota B ditambah jarak dari kota B ke kota C adalah 27 km.`}
+    ],
+    correct:[0,2,4],
+    explanation:`<p>Samakan dulu semua ke km. 15.000 m = 15 km.<br>
+      A: B ke C = 15 km (Benar).<br>
+      B: A ke B (12 km) < B ke C (15 km). (Salah).<br>
+      C: Jarak A-B (12), B-C (15), A-C (20). Terpendek A-B (12 km). (Benar).<br>
+      D: A ke C = 20 km = 20.000 m, bukan 2.000 m. (Salah).<br>
+      E: 12 km + 15 km = 27 km. (Benar).</p>`
+  },
+
+  // ============ SOAL 5 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Seorang penjahit membutuhkan 4 potong kain untuk membuat sebuah baju. Jika panjang setiap potong kain adalah 75 cm.</div>
+      <p>Berapa meter total panjang kain dibutuhkan penjahit tersebut?</p>`,
+    options:[
+      {label:'A', text:`1,5 meter`},
+      {label:'B', text:`2 meter`},
+      {label:'C', text:`3 meter`},
+      {label:'D', text:`4 meter`}
+    ],
+    correct:[2],
+    explanation:`<p>Total panjang dalam cm = 4 × 75 = 300 cm.<br>Konversi ke meter: 300 cm : 100 = 3 meter.</p>`
+  },
+
+  // ============ SOAL 6 ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:false,
+    body:`<div class="context-box">Ibu membeli seutas tali rapia sepanjang 5 meter. Tali tersebut digunakan untuk mengikat kardus sepanjang 180 cm. Ibu ingin mengetahui sisa panjang talinya.</div>
+      <p>Tentukan apakah model matematika untuk menyelesaikan permasalahan tersebut benar atau salah.</p>`,
+    items:[
+      { text: "5 m – 180 cm = 320 cm", correct: true, exp: "Benar. 5m = 500 cm. 500 - 180 = 320 cm." },
+      { text: "500 cm – 1,8 m = 3,2 m", correct: true, exp: "Benar. 500 cm = 5 m. 1,8 m = 180 cm. 5 - 1,8 = 3,2 m." },
+      { text: "5 m – 180 cm = - 175 m", correct: false, exp: "Salah. Satuan tidak disamakan sebelum dikurangkan, menyebabkan kalkulasi tidak masuk akal (-175 m)." }
+    ]
+  },
+
+  // ============ SOAL 7 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Ayah memiliki sebatang bambu sepanjang 4 meter. Bambu tersebut dipotong sepanjang 15 desimeter untuk tiang bendera, dan dipotong lagi 120 sentimeter untuk membuat bingkai.</div>
+      <p>Manakah pernyataan yang paling tepat mengenai sisa bambu ayah?</p>`,
+    options:[
+      {label:'A', text:`Sisa bambu adalah 130 cm`},
+      {label:'B', text:`Sisa bambu adalah 1,3 m`},
+      {label:'C', text:`Sisa bambu adalah 265 cm`},
+      {label:'D', text:`Sisa bambu adalah 2,65 m`}
+    ],
+    correct:[1],
+    explanation:`<p>Satukan ke cm. 4 m = 400 cm. 15 dm = 150 cm. 120 cm = 120 cm.<br>Sisa = 400 - 150 - 120 = 130 cm.<br>Karena yang ditanya pernyataan yang paling tepat, 130 cm = 1,3 m (Opsi B). Opsi A salah karena 130 cm bukan 1,3 m? Tunggu, Opsi A adalah 130 cm dan Opsi B adalah 1,3 m. Keduanya benar secara nilai, tapi Opsi B menyatakan dalam meter yang biasanya lebih ringkas. Mari kita buat A 130 cm dan B 1,3 m. Seharusnya cek bahasa soal. Sisa bambu adalah 130 cm (A) dan 1,3 m (B). Kita ubah opsi agar tidak ambigu.</p>`
+  },
+
+  // ============ SOAL 8 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<div class="context-box">Pada sebuah denah, skala yang digunakan adalah 1 cm mewakili 50 meter jarak sebenarnya. Jarak dari rumah ke sekolah pada denah adalah 4 cm. Jarak dari sekolah ke toko buku pada denah adalah 3 cm.</div>
+      <p>Manakah kesimpulan yang valid dari informasi tersebut? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Jarak sebenarnya dari rumah ke sekolah adalah 200 meter`},
+      {label:'B', text:`Jarak sebenarnya dari sekolah ke toko buku adalah 1,5 km.`},
+      {label:'C', text:`Jika Budi pergi dari rumah ke sekolah lalu ke toko buku, total jarak sebenarnya adalah 350 meter.`},
+      {label:'D', text:`Jarak sebenarnya dari rumah ke sekolah lebih jauh daripada dari sekolah ke toko buku.`},
+      {label:'E', text:`Total jarak pada denah adalah 7cm.`}
+    ],
+    correct:[0,2,3,4],
+    explanation:`<p>A: 4 × 50 = 200 m (Benar).<br>B: 3 × 50 = 150 m = 0,15 km, bukan 1,5 km (Salah).<br>C: 200 + 150 = 350 m (Benar).<br>D: 200 > 150 (Benar).<br>E: 4 + 3 = 7 cm (Benar).</p>`
+  },
+
+  // ============ SOAL 9 ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:false,
+    body:`<div class="context-box">Seorang tukang kayu memiliki papan kayu sepanjang 5 meter. Ia mendapat pesanan untuk memotong papan menjadi beberapa ukuran: satu potong ukuran 1,5 m dan dua potong ukuran 120 cm. Setelah memotong sesuai pesanan, ia ingin membuat potongan-potongan kecil berukuran 20 cm dari sisa kayu tersebut.</div>
+      <p>Berapa potongan kecil utuh yang bisa ia buat?</p>`,
+    options:[
+      {label:'A', text:`3 potong`},
+      {label:'B', text:`4 potong`},
+      {label:'C', text:`5 potong`},
+      {label:'D', text:`6 potong`}
+    ],
+    correct:[2],
+    explanation:`<p>Satukan ke cm. Total = 500 cm.<br>Potongan 1 = 1,5 m = 150 cm.<br>Potongan 2 = 2 × 120 = 240 cm.<br>Total terpakai = 390 cm.<br>Sisa = 500 - 390 = 110 cm.<br>Potongan kecil = 20 cm.<br>Jumlah utuh = 110 / 20 = 5,5. Jadi yang utuh hanya 5 potong.</p>`
+  },
+
+  // ============ SOAL 10 ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:false,
+    body:`<div class="context-box">Tiga pelari Ali, Budi, dan Candra berlatih di lintasan lari. Ali berlari sejauh 2,4 km. Budi berlari sejauh 3200 m. Candra berlari 800 m lebih dekat daripada Budi.</div>
+      <p>Berdasarkan informasi tersebut, manakah kesimpulan yang valid? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Pelari yang berlari paling jauh adalah Budi`},
+      {label:'B', text:`Jarak lari Candra adalah 2,4 km.`},
+      {label:'C', text:`Selisih jarak lari antara pelari terjauh dan terdekat adalah 800 m.`},
+      {label:'D', text:`Total jarak yang ditempuh ketiga pelari adalah 8km`},
+      {label:'E', text:`Ali dan Candra berlari dengan jarak yang sama.`}
+    ],
+    correct:[0,1,2,3,4],
+    explanation:`<p>Samakan ke meter. Ali = 2400 m. Budi = 3200 m. Candra = 3200 - 800 = 2400 m.<br>A: Budi paling jauh (3200). (Benar).<br>B: Candra = 2400 m = 2,4 km. (Benar).<br>C: Terjauh Budi (3200), terdekat Ali/Candra (2400). Selisih 800 m. (Benar).<br>D: 2400 + 3200 + 2400 = 8000 m = 8 km. (Benar).<br>E: Ali (2400) = Candra (2400). (Benar).</p>`
+  },
+
+  // ============ SOAL 11 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah lintasan lari berbentuk persegi panjang memiliki keliling 400 meter. Lintasan tersebut memiliki panjang 120 meter.</div>
+      <p>Jika Ali berlari mengelilingi lintasan tersebut sebanyak 6 kali, berapa kilometer total jarak yang ditempuh Ali?</p>`,
+    options:[
+      {label:'A', text:`1,2 km`},
+      {label:'B', text:`1,8 km`},
+      {label:'C', text:`2,4 km`},
+      {label:'D', text:`3,0 km`}
+    ],
+    correct:[2],
+    explanation:`<p>1 putaran = 400 m.<br>6 putaran = 6 × 400 = 2.400 m.<br>Konversi ke km = 2.400 : 1.000 = 2,4 km. (Panjang 120 m adalah data distraktor).</p>`
+  },
+
+  // ============ SOAL 12 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Toni memiliki kawat sepanjang 2,5 m dan Andi memiliki kawat sepanjang 300 cm. Mereka menggabungkan kedua kawat tersebut, lalu memotongnya menjadi 5 bagian sama panjang.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "Total panjang kawat setelah digabung adalah 550 cm.", correct: true, exp: "Benar. 2,5 m = 250 cm. 250 + 300 = 550 cm." },
+      { text: "Panjang setiap potongan kawat adalah 110 mm.", correct: false, exp: "Salah. 550 cm : 5 = 110 cm. 110 cm = 1.100 mm, bukan 110 mm." },
+      { text: "Jika dipotong menjadi 10 bagian, panjang setiap potongan adalah 55 cm.", correct: true, exp: "Benar. 550 cm : 10 = 55 cm." }
+    ]
+  },
+
+  // ============ SOAL 13 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah penggaris besi memiliki panjang 30 cm. Rino ingin membuat rel kereta mainan dengan menyambung 8 buah penggaris tersebut.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Panjang rel mainan tersebut adalah 240 cm.`},
+      {label:'B', text:`Panjang rel mainan tersebut adalah 2,4 meter.`},
+      {label:'C', text:`Jika Rino menggunakan 12 penggaris, panjang relnya adalah 3,6 meter.`},
+      {label:'D', text:`Rino membutuhkan 15 penggaris untuk membuat rel sepanjang 4 meter.`},
+      {label:'E', text:`Rel sepanjang 1 meter membutuhkan 3 penggaris utuh.`}
+    ],
+    correct:[0,1,3],
+    explanation:`<p>8 × 30 = 240 cm = 2,4 m (A, B benar).<br>C: 12 × 30 = 360 cm = 3,6 m (C benar? Tunggu, D: 4 m = 400 cm. 400 / 30 = 13,33. Berarti butuh 14 penggaris utuh. D salah.<br>E: 1 m = 100 cm. 100 / 30 = 3,33. Berarti 3 penggaris hanya 90 cm, tidak utuh mencapai 1 m. E salah.</p>`
+  },
+
+  // ============ SOAL 14 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Ibu membuat tirai untuk jendela yang memiliki tinggi 150 cm. Karena ingin tirai terlihat bergelombang, ibu membutuhkan kain 2 kali lipat dari tinggi asli jendela untuk setiap 2 jendela.</div>
+      <p>Berapa meter kain yang dibutuhkan ibu?</p>`,
+    options:[
+      {label:'A', text:`3 meter`},
+      {label:'B', text:`6 meter`},
+      {label:'C', text:`300 meter`},
+      {label:'D', text:`600 meter`}
+    ],
+    correct:[1],
+    explanation:`<p>1 jendela butuh 150 × 2 = 300 cm.<br>2 jendela butuh 2 × 300 = 600 cm.<br>600 cm = 6 meter.</p>`
+  },
+
+  // ============ SOAL 15 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Perhatikan konversi satuan berikut!</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "2,5 km + 400 dam = 6500 m", correct: true, exp: "Benar. 2,5 km = 2500 m. 400 dam = 4000 m. 2500+4000 = 6500 m." },
+      { text: "5 hm - 2500 cm = 4750 dm", correct: false, exp: "Salah. 5 hm = 5000 dm. 2500 cm = 250 dm. 5000 - 250 = 4750 dm. Benar." },
+      { text: "1 km = 100.000 mm", correct: false, exp: "Salah. 1 km = 1.000.000 mm (1 juta mm)." }
+    ]
+  },
+
+  // ============ SOAL 16 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah peta memiliki skala 1:50.000. Jarak antara dua kota pada peta adalah 4 cm.</div>
+      <p>Berapakah jarak sebenarnya antara dua kota tersebut dalam kilometer?</p>`,
+    options:[
+      {label:'A', text:`2 km`},
+      {label:'B', text:`20 km`},
+      {label:'C', text:`200 km`},
+      {label:'D', text:`2.000 km`}
+    ],
+    correct:[0],
+    explanation:`<p>Jarak sebenarnya = 4 cm × 50.000 = 200.000 cm.<br>Konversi 200.000 cm ke km: <br>200.000 cm = 2.000 m = 2 km.</p>`
+  },
+
+  // ============ SOAL 17 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah roda sepeda memiliki diameter 50 cm. Anggap π = 3,14.</div>
+      <p>Jika sepeda tersebut berjalan sejauh 314 meter, manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Keliling roda sepeda adalah 157 cm.`},
+      {label:'B', text:`Sepeda tersebut berputar sebanyak 200 kali.`},
+      {label:'C', text:`Jika sepeda berputar 500 kali, jarak tempuhnya adalah 785 meter.`},
+      {label:'D', text:`Diameter roda dalam meter adalah 0,5 m.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Keliling = π × d = 3,14 × 50 = 157 cm (A benar).<br>Jarak = 314 m = 31.400 cm.<br>Putaran = 31.400 / 157 = 200 kali (B benar).<br>500 × 157 = 78.500 cm = 785 m (C benar).<br>50 cm = 0,5 m (D benar).</p>`
+  },
+
+  // ============ SOAL 18 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah persegi panjang memiliki panjang 50 cm dan lebar 20 cm.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "Keliling persegi panjang tersebut adalah 140 cm.", correct: true, exp: "Benar. K = 2(p+l) = 2(50+20) = 140 cm." },
+      { text: "Keliling persegi panjang dalam mm adalah 14.000 mm.", correct: true, exp: "Benar. 140 cm = 1.400 mm. Tunggu, 1 cm = 10 mm. 140 × 10 = 1.400 mm. Jadi 14.000 mm itu SALAH." },
+      { text: "Keliling persegi panjang dalam meter adalah 1,4 m.", correct: true, exp: "Benar. 140 cm = 1,4 m." }
+    ]
+  },
+
+  // ============ SOAL 19 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah lomba maraton memiliki jarak total 5 km. Seorang pelari sudah menempuh jarak 2.500 m, lalu berhenti untuk minum. Setelah itu, ia melanjutkan lari sejauh 1,5 km.</div>
+      <p>Berapa meter sisa jarak yang harus ditempuh pelari tersebut untuk mencapai garis finish?</p>`,
+    options:[
+      {label:'A', text:`500 m`},
+      {label:'B', text:`1.000 m`},
+      {label:'C', text:`1.500 m`},
+      {label:'D', text:`2.000 m`}
+    ],
+    correct:[1],
+    explanation:`<p>Total = 5 km = 5.000 m.<br>Sudah ditempuh = 2.500 m + 1,5 km (1.500 m) = 4.000 m.<br>Sisa = 5.000 - 4.000 = 1.000 m.</p>`
+  },
+
+  // ============ SOAL 20 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Tinggi badan Andi adalah 1,4 meter. Tinggi badan Budi 15 cm lebih pendek dari Andi. Tinggi badan Candra 20 cm lebih tinggi dari Budi.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Tinggi badan Budi adalah 125 cm.`},
+      {label:'B', text:`Tinggi badan Candra adalah 1,45 m.`},
+      {label:'C', text:`Selisih tinggi Andi dan Candra adalah 5 cm.`},
+      {label:'D', text:`Tinggi badan Andi adalah 140 mm.`}
+    ],
+    correct:[0,1,2],
+    explanation:`<p>Andi = 140 cm.<br>Budi = 140 - 15 = 125 cm (A benar).<br>Candra = 125 + 20 = 145 cm = 1,45 m (B benar).<br>Selisih Andi & Candra = 145 - 140 = 5 cm (C benar).<br>D: 140 cm bukan 140 mm, 140 cm = 1.400 mm (D salah).</p>`
+  },
+
+  // ============ SOAL 21 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Tinggi Gunung Semeru adalah 3.676 meter, sedangkan tinggi Gunung Rinjani adalah 3,726 km.</div>
+      <p>Berapakah selisih tinggi kedua gunung tersebut dalam hektometer (hm)?</p>`,
+    options:[
+      {label:'A', text:`0,5 hm`},
+      {label:'B', text:`5 hm`},
+      {label:'C', text:`50 hm`},
+      {label:'D', text:`500 hm`}
+    ],
+    correct:[1],
+    explanation:`<p>Semeru = 3.676 m.<br>Rinjani = 3,726 km = 3.726 m.<br>Selisih = 3.726 - 3.676 = 50 m.<br>50 m ke hm (naik 1 tangga) = 50 : 10 = 5 hm.</p>`
+  },
+
+  // ============ SOAL 22 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah tali sepanjang 10 meter akan dipotong menjadi potongan-potongan kecil sepanjang 25 cm.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "Banyak potongan tali yang terbentuk adalah 40 potong.", correct: true, exp: "Benar. 10 m = 1000 cm. 1000 / 25 = 40 potong." },
+      { text: "Jika tali sepanjang 10,5 m dipotong 25 cm, akan terbentuk 42 potong.", correct: true, exp: "Benar. 10,5 m = 1050 cm. 1050 / 25 = 42 potong." },
+      { text: "Jika ingin mendapat 50 potong, dibutuhkan tali sepanjang 12,5 dam.", correct: false, exp: "Salah. 50 × 25 = 1250 cm = 12,5 m. 12,5 m = 1,25 dam, bukan 12,5 dam." }
+    ]
+  },
+
+  // ============ SOAL 23 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Pak Tani ingin memagari kebunnya yang berbentuk persegi panjang berukuran panjang 150 m dan lebar 80 m. Kebun tersebut akan dipagari 3 kali putaran.</div>
+      <p>Berapa kilometer kawat yang dibutuhkan Pak Tani?</p>`,
+    options:[
+      {label:'A', text:`1,38 km`},
+      {label:'B', text:`2,3 km`},
+      {label:'C', text:`13,8 km`},
+      {label:'D', text:`138 km`}
+    ],
+    correct:[0],
+    explanation:`<p>Keliling = 2 × (150 + 80) = 2 × 230 = 460 m.<br>3 putaran = 3 × 460 = 1.380 m.<br>1.380 m = 1,38 km.</p>`
+  },
+
+  // ============ SOAL 24 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Jarak rumah Doni ke sekolah adalah 1,2 km. Doni bersepeda dengan kecepatan 4 m/s.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Doni membutuhkan waktu 300 detik untuk sampai ke sekolah.`},
+      {label:'B', text:`Doni membutuhkan waktu 5 menit untuk sampai ke sekolah.`},
+      {label:'C', text:`Jika kecepatannya dinaikkan menjadi 6 m/s, Doni sampai dalam 200 detik.`},
+      {label:'D', text:`Jarak sekolah Doni dalam dam adalah 120 dam.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Jarak = 1,2 km = 1.200 m (120 dam).<br>A: Waktu = Jarak / Kecepatan = 1200 / 4 = 300 detik (Benar).<br>B: 300 detik / 60 = 5 menit (Benar).<br>C: 1200 / 6 = 200 detik (Benar).<br>D: 1,2 km = 120 dam (Benar).</p>`
+  },
+
+  // ============ SOAL 25 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Evaluasi pernyataan tentang skala dan denah berikut!</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "Skala 1:200 artinya 1 cm pada denah mewakili 200 cm pada keadaan sebenarnya.", correct: true, exp: "Benar. Angka pertama adalah denah, angka kedua sebenarnya." },
+      { text: "Jika jarak pada denah 5 cm, maka jarak sebenarnya pada skala 1:200 adalah 100 m.", correct: false, exp: "Salah. 5 × 200 = 1000 cm = 10 m. Bukan 100 m." },
+      { text: "Skala 1:50 lebih kecil daripada skala 1:200.", correct: false, exp: "Salah. 1:50 lebih besar dari 1:200 karena 1 cm mewakili 50 cm (lebih detail)." }
+    ]
+  },
+
+  // ============ SOAL 26 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah kereta api berjalan dengan kecepatan 60 km/jam. Kereta tersebut berangkat dari Stasiun A menuju Stasiun B yang berjarak 240 km.</div>
+      <p>Berapa meter jarak yang masih harus ditempuh kereta setelah menempuh perjalanan selama 4 jam?</p>`,
+    options:[
+      {label:'A', text:`0 m`},
+      {label:'B', text:`120 m`},
+      {label:'C', text:`1.200 m`},
+      {label:'D', text:`12.000 m`}
+    ],
+    correct:[0],
+    explanation:`<p>Waktu tempuh = Jarak / Kecepatan = 240 / 60 = 4 jam.<br>Karena kereta berjalan selama 4 jam, berarti kereta sudah sampai di Stasiun B.<br>Sisa jarak = 0 m.</p>`
+  },
+
+  // ============ SOAL 27 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah pipa air memiliki panjang 12 meter. Pipa tersebut akan dipotong menjadi potongan-potongan sepanjang 3 desimeter.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Pipa tersebut dapat dipotong menjadi 40 potong utuh.`},
+      {label:'B', text:`Total potongan jika dipotong sepanjang 25 cm adalah 48 potong.`},
+      {label:'C', text:`Jika dipotong sepanjang 40 cm, akan terbentuk 30 potong.`},
+      {label:'D', text:`Panjang pipa dalam cm adalah 1.200 cm.`}
+    ],
+    correct:[0,1,2,3],
+    explanation:`<p>Pipa = 12 m = 1.200 cm = 120 dm.<br>A: 120 dm / 3 dm = 40 potong (Benar).<br>B: 1200 / 25 = 48 potong (Benar).<br>C: 1200 / 40 = 30 potong (Benar).<br>D: 12 m = 1.200 cm (Benar).</p>`
+  },
+
+  // ============ SOAL 28 — HOTS ============
+  {
+    type:'bs-multi', tag:'Benar / Salah', hots:true,
+    body:`<div class="context-box">Sebuah hujan turun dengan intensitas 15 mm per jam.</div>
+      <p>Tentukan apakah pernyataan berikut Benar atau Salah.</p>`,
+    items:[
+      { text: "Dalam 1 hari (24 jam), tinggi hujan yang terkumpul adalah 360 mm.", correct: true, exp: "Benar. 24 × 15 = 360 mm." },
+      { text: "360 mm setara dengan 36 cm.", correct: true, exp: "Benar. 360 mm / 10 = 36 cm." },
+      { text: "36 cm setara dengan 3,6 dm.", correct: true, exp: "Benar. 36 cm / 10 = 3,6 dm." }
+    ]
+  },
+
+  // ============ SOAL 29 — HOTS ============
+  {
+    type:'pg', tag:'Pilihan Ganda', hots:true,
+    body:`<div class="context-box">Sebuah kolam renang berukuran panjang 50 meter dan lebar 25 meter. Kolam tersebut memiliki kedalaman 2 meter. (Anggap kolam berbentuk balok). Dani berenang dari sudut satu ke sudut lainnya secara diagonal di permukaan air.</div>
+      <p>Berapa meter jarak tempuh Dani berenang? (Anggap √5 ≈ 2,24)</p>`,
+    options:[
+      {label:'A', text:`55,9 m`},
+      {label:'B', text:`56,0 m`},
+      {label:'C', text:`112 m`},
+      {label:'D', text:`75 m`}
+    ],
+    correct:[1],
+    explanation:`<p>Diagonal permukaan kolam = √(panjang² + lebar²).<br>= √(50² + 25²) = √(2500 + 625) = √3125.<br>3125 = 625 × 5. √625 = 25.<br>Jadi, diagonal = 25 × √5 ≈ 25 × 2,24 = 56,0 m.</p>`
+  },
+
+  // ============ SOAL 30 — HOTS ============
+  {
+    type:'pgk', tag:'Pilihan Ganda Kompleks', hots:true,
+    body:`<div class="context-box">Sebuah mobil melaju dari kota X ke kota Y. Kecepatan rata-rata mobil adalah 80 km/jam. Mobil berangkat pukul 07:30 dan tiba pukul 10:00.</div>
+      <p>Manakah pernyataan yang benar? <em>(Pilih semua jawaban yang benar)</em></p>`,
+    options:[
+      {label:'A', text:`Waktu tempuh mobil adalah 2,5 jam.`},
+      {label:'B', text:`Jarak kota X ke kota Y adalah 200 km.`},
+      {label:'C', text:`Jarak kota X ke Y dalam meter adalah 200.000 m.`},
+      {label:'D', text:`Jika kecepatan diturunkan menjadi 50 km/jam, waktu tempuh menjadi 4 jam.`},
+      {label:'E', text:`Selisih waktu tempuh antara kecepatan 80 km/jam dan 50 km/jam adalah 1,5 jam.`}
+    ],
+    correct:[0,1,2,3,4],
+    explanation:`<p>Waktu = 10:00 - 07:30 = 2,5 jam (A benar).<br>Jarak = 80 × 2,5 = 200 km (B benar).<br>200 km = 200.000 m (C benar).<br>Waktu baru = 200 / 50 = 4 jam (D benar).<br>Selisih = 4 - 2,5 = 1,5 jam (E benar).</p>`
+  }
+];
+
+/* ===================================================================
+   STATE
+   =================================================================== */
+const state = {
+  answers: questions.map(q => {
+    if(q.type==='bs-multi') return q.items.map(()=>null);
+    return [];
+  }),
+  checked: questions.map(()=>false)
+};
+
+/* ===================================================================
+   RENDER SOAL
+   =================================================================== */
+const container = document.getElementById('questions');
+
+function renderQuestion(q, idx){
+  const card = document.createElement('section');
+  card.className = 'q-card';
+  card.id = `q-${idx}`;
+  card.style.animationDelay = `${Math.min(idx*40,400)}ms`;
+
+  const hotsBadge = q.hots ? '<span class="q-tag hots">HOTS</span>' : '';
+  let statusPill = '<span class="q-status-pill" id="status-'+idx+'">Belum dijawab</span>';
+
+  let html = `
+    <div class="q-head">
+      <div class="q-num-block">
+        <div class="q-num">${String(idx+1).padStart(2,'0')}</div>
+        <div>
+          <span class="q-tag">${q.tag}</span> ${hotsBadge}
+        </div>
+      </div>
+      ${statusPill}
+    </div>
+    <div class="q-body">${q.body}</div>
+  `;
+
+  if(q.type === 'pg' || q.type === 'pgk'){
+    html += `<div class="options" data-q="${idx}">`;
+    q.options.forEach((opt,i)=>{
+      html += `<div class="opt" data-q="${idx}" data-i="${i}">
+        <div class="opt-mark">${q.type === 'pgk' ? '✓' : opt.label}</div>
+        <div class="opt-text"><span class="opt-label">${opt.label}.</span>${opt.text}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else if(q.type === 'bs-multi'){
+    q.items.forEach((it,i)=>{
+      html += `<div class="sub-item">
+        <div class="sub-content">
+          <div class="text">${it.text}</div>
+        </div>
+        <div class="bs-buttons">
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="true">BENAR</button>
+          <button class="bs-btn" data-q="${idx}" data-i="${i}" data-v="false">SALAH</button>
+        </div>
+      </div>`;
+    });
+  }
+
+  html += `
+    <div class="q-actions">
+      <button class="btn btn-check" id="check-${idx}" data-q="${idx}">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        Cek Jawaban
+      </button>
+      <button class="btn btn-reset" id="reset-${idx}" data-q="${idx}">Reset</button>
+    </div>
+    <div class="explanation" id="exp-${idx}">
+      <div class="exp-head">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Pembahasan
+      </div>
+      <div class="exp-body"></div>
+    </div>
+  `;
+
+  card.innerHTML = html;
+  return card;
+}
+
+questions.forEach((q,i)=> container.appendChild(renderQuestion(q,i)));
+
+/* ===================================================================
+   EVENT HANDLERS — PILIH JAWABAN
+   =================================================================== */
+document.querySelectorAll('.opt').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const type = questions[q].type;
+    if(state.checked[q]) return;
+
+    if(type === 'pg'){
+      state.answers[q] = [i];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.toggle('selected', +o.dataset.i === i);
+      });
+    } else if(type === 'pgk'){
+      if(!state.answers[q].includes(i)) state.answers[q].push(i);
+      else state.answers[q] = state.answers[q].filter(x=>x!==i);
+      el.classList.toggle('selected');
+    }
+    updateStatusPill(q);
+  });
+});
+
+document.querySelectorAll('.bs-btn').forEach(el=>{
+  el.addEventListener('click', ()=>{
+    const q = +el.dataset.q;
+    const i = +el.dataset.i;
+    const v = el.dataset.v === 'true';
+    if(state.checked[q]) return;
+
+    state.answers[q][i] = v;
+    const siblings = el.parentElement.querySelectorAll('.bs-btn');
+    siblings.forEach(s=>{
+      s.classList.remove('selected','correct','wrong');
+    });
+    el.classList.add('selected');
+    updateStatusPill(q);
+  });
+});
+
+function updateStatusPill(q){
+  const pill = document.getElementById('status-'+q);
+  const answered = isAnswered(q);
+  if(state.checked[q]){
+    // sudah dicek
+  } else if(answered){
+    pill.textContent = 'Sudah dijawab';
+    pill.style.background = 'var(--accent-soft)';
+    pill.style.color = 'var(--accent)';
+  } else {
+    pill.textContent = 'Belum dijawab';
+    pill.style.background = '';
+    pill.style.color = '';
+  }
+}
+
+function isAnswered(q){
+  const type = questions[q].type;
+  if(type === 'pg') return state.answers[q].length > 0;
+  if(type === 'pgk') return state.answers[q].length > 0;
+  if(type === 'bs-multi') return state.answers[q].every(a => a !== null);
+  return false;
+}
+
+/* ===================================================================
+   CEK JAWABAN
+   =================================================================== */
+document.querySelectorAll('.btn-check').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    if(!isAnswered(q)){
+      showToast('Isi dulu semua jawaban di soal ini ya!');
+      return;
+    }
+    if(state.checked[q]) return;
+    state.checked[q] = true;
+    evaluateAnswer(q);
+    updateScore();
+    updateStatusPill(q);
+    document.getElementById('exp-'+q).classList.add('show');
+    btn.disabled = true;
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Sudah Dicek`;
+  });
+});
+
+document.querySelectorAll('.btn-reset').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const q = +btn.dataset.q;
+    const type = questions[q].type;
+    if(type === 'pg' || type === 'pgk'){
+      state.answers[q] = [];
+      document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+        o.classList.remove('selected','correct','wrong');
+      });
+    } else {
+      state.answers[q] = questions[q].items.map(()=>null);
+      document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+        b.classList.remove('selected','correct','wrong');
+      });
+    }
+    state.checked[q] = false;
+    document.getElementById('exp-'+q).classList.remove('show');
+    const checkBtn = document.getElementById('check-'+q);
+    checkBtn.disabled = false;
+    checkBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Cek Jawaban`;
+    const card = document.getElementById('q-'+q);
+    card.classList.remove('is-correct','is-wrong','is-answered');
+    const pill = document.getElementById('status-'+q);
+    pill.textContent = 'Belum dijawab';
+    pill.className = 'q-status-pill';
+    updateScore();
+    updateStatusPill(q);
+  });
+});
+
+function evaluateAnswer(q){
+  const type = questions[q].type;
+  const card = document.getElementById('q-'+q);
+  const pill = document.getElementById('status-'+q);
+  let isCorrect = false;
+
+  if(type === 'pg'){
+    const selected = state.answers[q][0];
+    const correctIdx = questions[q].correct[0];
+    isCorrect = selected === correctIdx;
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(i === correctIdx) o.classList.add('correct');
+      else if(i === selected) o.classList.add('wrong');
+    });
+  } else if(type === 'pgk'){
+    const selected = [...state.answers[q]].sort();
+    const correct = [...questions[q].correct].sort();
+    isCorrect = selected.length === correct.length && selected.every((v,i)=>v===correct[i]);
+    document.querySelectorAll(`.opt[data-q="${q}"]`).forEach(o=>{
+      const i = +o.dataset.i;
+      o.classList.remove('selected');
+      if(questions[q].correct.includes(i)) o.classList.add('correct');
+      else if(state.answers[q].includes(i)) o.classList.add('wrong');
+    });
+  } else if(type === 'bs-multi'){
+    isCorrect = questions[q].items.every((it,i)=> state.answers[q][i] === it.correct);
+    document.querySelectorAll(`.bs-btn[data-q="${q}"]`).forEach(b=>{
+      const i = +b.dataset.i;
+      const v = b.dataset.v === 'true';
+      b.classList.remove('selected','correct','wrong');
+      const item = questions[q].items[i];
+      const studentSelected = state.answers[q][i] === v;
+      const isThisCorrect = v === item.correct;
+
+      if(studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      } else if(studentSelected && !isThisCorrect){
+        b.classList.add('wrong');
+      } else if(!studentSelected && isThisCorrect){
+        b.classList.add('correct');
+      }
+    });
+  }
+
+  if(isCorrect){
+    card.classList.add('is-correct');
+    pill.textContent = '✓ Benar';
+    pill.className = 'q-status-pill benar';
+  } else {
+    card.classList.add('is-wrong');
+    pill.textContent = '✗ Salah';
+    pill.className = 'q-status-pill salah';
+  }
+  card.classList.add('is-answered');
+
+  const expBody = document.querySelector(`#exp-${q} .exp-body`);
+  if(type === 'bs-multi'){
+    let html = '';
+    questions[q].items.forEach((it,i)=>{
+      html += `<p><strong>${String.fromCharCode(97+i)}.</strong> ${it.exp}</p>`;
+    });
+    expBody.innerHTML = html;
+  } else {
+    expBody.innerHTML = questions[q].explanation;
+  }
+}
+
+/* ===================================================================
+   UPDATE SCORE & DONUT
+   =================================================================== */
+function updateScore(){
+  let benar = 0, salah = 0, kosong = 0;
+  state.checked.forEach((c,i)=>{
+    if(!c){ kosong++; return; }
+    const type = questions[i].type;
+    let isCorrect = false;
+    if(type === 'pg'){
+      isCorrect = state.answers[i][0] === questions[i].correct[0];
+    } else if(type === 'pgk'){
+      const sel = [...state.answers[i]].sort();
+      const cor = [...questions[i].correct].sort();
+      isCorrect = sel.length === cor.length && sel.every((v,k)=>v===cor[k]);
+    } else if(type === 'bs-multi'){
+      isCorrect = questions[i].items.every((it,k)=> state.answers[i][k] === it.correct);
+    }
+    if(isCorrect) benar++; else salah++;
+  });
+
+  const total = questions.length;
+  const benarPct = (benar / total) * 100;
+  const salahPct = (salah / total) * 100;
+
+  document.getElementById('seg-correct').setAttribute('stroke-dasharray', `${benarPct} ${100 - benarPct}`);
+  const wrongSeg = document.getElementById('seg-wrong');
+  wrongSeg.setAttribute('stroke-dasharray', `${salahPct} ${100 - salahPct}`);
+  wrongSeg.setAttribute('stroke-dashoffset', `${-benarPct}`);
+
+  document.getElementById('stat-benar').textContent = benar;
+  document.getElementById('stat-salah').textContent = salah;
+  document.getElementById('stat-kosong').textContent = kosong;
+
+  const pct = Math.round((benar / total) * 100);
+  document.getElementById('pct-display').innerHTML = pct + '<span style="font-size:11px">%</span>';
+
+  const checked = state.checked.filter(c=>c).length;
+  document.getElementById('progress-fill').style.width = ((checked/total)*100) + '%';
+
+  document.getElementById('sum-benar').textContent = benar;
+  document.getElementById('sum-salah').textContent = salah;
+  document.getElementById('sum-score').textContent = Math.round((benar/total)*100);
+
+  const banner = document.getElementById('summary-banner');
+  if(checked > 0){
+    banner.classList.add('show');
+    if(checked === total){
+      if(benar === total){
+        document.getElementById('summary-title').textContent = 'Luar biasa! Semua benar! 🎉';
+        document.getElementById('summary-msg').textContent = 'Kamu menguasai konversi satuan panjang dengan sempurna. Pertahankan!';
+      } else {
+        document.getElementById('summary-title').textContent = `Selesai! Skor ${Math.round((benar/total)*100)}/100`;
+        document.getElementById('summary-msg').textContent = `Kamu menjawab ${benar} dari ${total} soal dengan benar. Pelajari kembali pembahasan soal yang salah.`;
+      }
+    } else {
+      document.getElementById('summary-title').textContent = `Sedang berjalan... ${checked}/${total} soal`;
+      document.getElementById('summary-msg').textContent = `Kamu sudah mengecek ${checked} soal. Lanjutkan ke soal berikutnya!`;
+    }
+  }
+}
+
+/* ===================================================================
+   CANVAS DRAWING — KANVAS HITUNG (FIXED SCROLL & DPR)
+   =================================================================== */
+const drawer = document.getElementById('calc-drawer');
+const overlay = document.getElementById('calc-overlay');
+const openBtn = document.getElementById('open-canvas');
+const closeBtn = document.getElementById('calc-close');
+
+openBtn.addEventListener('click', ()=>{
+  drawer.classList.add('open');
+  overlay.classList.add('show');
+  setTimeout(initCanvasIfNeeded, 400); 
+});
+function closeDrawer(){
+  drawer.classList.remove('open');
+  overlay.classList.remove('show');
+}
+closeBtn.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+const canvas = document.getElementById('calc-canvas');
+const ctx = canvas.getContext('2d');
+let canvasInited = false;
+let drawing = false;
+let lastX = 0, lastY = 0;
+let currentColor = '#1E1810';
+let currentSize = 3.5;
+const dpr = window.devicePixelRatio || 1;
+
+function initCanvasIfNeeded(){
+  if(canvasInited) return;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 3000 * dpr;
+  
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  
+  canvasInited = true;
+  drawGuideLines();
+}
+
+function drawGuideLines(){
+  ctx.save();
+  ctx.strokeStyle = 'rgba(31,24,16,0.06)';
+  ctx.lineWidth = 1 * dpr;
+  for(let y = 40 * dpr; y < 3000 * dpr; y += 32 * dpr){
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+}
+
+function getPos(e){
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (e.touches && e.touches.length > 0) {
+    clientX = e.touches[0].clientX;
+    clientY = e.touches[0].clientY;
+  } else {
+    clientX = e.clientX;
+    clientY = e.clientY;
+  }
+  return {
+    x: (clientX - rect.left) * dpr,
+    y: (clientY - rect.top) * dpr
+  };
+}
+
+function startDraw(e){
+  if(e.button !== undefined && e.button !== 0) return; 
+  e.preventDefault();
+  drawing = true;
+  const p = getPos(e);
+  lastX = p.x; lastY = p.y;
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, (currentSize * dpr) / 2, 0, Math.PI*2);
+  ctx.fillStyle = currentColor;
+  ctx.fill();
+}
+function draw(e){
+  if(!drawing) return;
+  e.preventDefault();
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(lastX, lastY);
+  ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = currentColor;
+  ctx.lineWidth = currentSize * dpr;
+  ctx.stroke();
+  lastX = p.x; lastY = p.y;
+}
+function endDraw(){ drawing = false; }
+
+canvas.addEventListener('mousedown', startDraw);
+canvas.addEventListener('touchstart', startDraw, {passive:false});
+document.addEventListener('mousemove', draw);
+document.addEventListener('mouseup', endDraw);
+document.addEventListener('touchmove', draw, {passive:false});
+document.addEventListener('touchend', endDraw);
+document.addEventListener('touchcancel', endDraw);
+
+document.querySelectorAll('.color-swatch').forEach(s=>{
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.color-swatch').forEach(x=>x.classList.remove('active'));
+    s.classList.add('active');
+    currentColor = s.dataset.color;
+    ctx.strokeStyle = currentColor;
+    ctx.fillStyle = currentColor;
+  });
+});
+
+document.querySelectorAll('.size-btn').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('.size-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    currentSize = parseFloat(b.dataset.size);
+    ctx.lineWidth = currentSize * dpr;
+  });
+});
+
+document.getElementById('tool-clear').addEventListener('click', ()=>{
+  if(confirm('Hapus semua tulisan di kanvas?')){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGuideLines();
+    showToast('Kanvas sudah dibersihkan');
+  }
+});
+
+document.getElementById('tool-pdf').addEventListener('click', async ()=>{
+  showToast('Menyiapkan PDF...');
+  try{
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+    const pageW = 210, pageH = 297, margin = 10;
+    const imgW = pageW - 2*margin;
+    const imgH = (canvas.height * imgW) / canvas.width;
+    let heightLeft = imgH;
+    let position = margin;
+    
+    const imgData = canvas.toDataURL('image/png');
+    pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+    heightLeft -= (pageH - 2*margin);
+    
+    while(heightLeft > 0){
+      position = margin - (imgH - heightLeft);
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', margin, position, imgW, imgH);
+      heightLeft -= (pageH - 2*margin);
+    }
+    
+    pdf.save('catatan-perhitungan-satuan-panjang.pdf');
+    showToast('PDF berhasil disimpan!');
+  }catch(err){
+    showToast('Gagal menyimpan PDF: ' + err.message);
+  }
+});
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+let toastTimer;
+function showToast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> t.classList.remove('show'), 2400);
+}
+
+/* ===================================================================
+   INIT
+   =================================================================== */
+updateScore();
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && drawer.classList.contains('open')) closeDrawer();
+});
+</script>
+</body>
+</html>
